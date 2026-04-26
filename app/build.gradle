@@ -1,0 +1,80 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace = "com.survivor3rdPersonView.app"
+    compileSdk 36
+	ndkVersion "29.0.14206865"
+	
+    defaultConfig {
+	applicationId = "com.survivor3rdPersonView.app"
+	
+        minSdk 30 // Android 11.
+        targetSdk 36
+        versionCode 1
+        versionName "1.0.0"
+		
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_static" // , "-DCMAKE_BUILD_TYPE=Release"
+                // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+                abiFilters 'arm64-v8a'
+                cFlags += "-DAndroidPackageName=com.survivor3rdPersonView.app"
+            }
+        }
+    }
+	
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_20
+        targetCompatibility JavaVersion.VERSION_20
+    }
+	
+//    applicationVariants.all { variant ->
+//        tasks["merge${variant.name.capitalize()}Assets"]
+//            .dependsOn("externalNativeBuild${variant.name.capitalize()}")
+//    }
+	
+    if(!project.hasProperty('EXCLUDE_NATIVE_LIBS')) {
+        sourceSets.main {
+            jniLibs.srcDir 'libs'
+        }
+        externalNativeBuild {
+            cmake {
+                    path 'jni/CMakeLists.txt'
+			}
+        }
+    }
+	
+    lint {
+        abortOnError = false
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+
+        def capitalizedName = variant.name.take(1).toUpperCase() + variant.name.drop(1)
+
+        // Wire tasks lazily to avoid 'Task not found' errors during configuration.
+        tasks.matching{ it.name == "merge${capitalizedName}Assets" }.configureEach {
+            dependsOn("externalNativeBuild${capitalizedName}")
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    
+    // Import the Firebase BoM.
+    implementation platform('com.google.firebase:firebase-bom:34.9.0')
+    implementation 'com.google.firebase:firebase-analytics'
+}

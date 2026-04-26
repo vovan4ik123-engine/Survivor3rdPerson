@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "195557367331",
+    "project_id": "survivor3rdpersonview",
+    "storage_bucket": "survivor3rdpersonview.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195557367331:android:2bc68f85c302f19cd0db96",
+        "android_client_info": {
+          "package_name": "com.survivor3rdPersonView.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiGeEZLjH2k8d4GCt9YGmgn5QZdGEX8Z0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
