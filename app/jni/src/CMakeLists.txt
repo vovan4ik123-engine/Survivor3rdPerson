@@ -19,7 +19,6 @@ add_library(main SHARED main.cpp
                         player/PlayerBulletAirTrajectory.cpp
                         enemy/BaseEnemy.cpp
                         enemy/MovableEnemy.cpp
-                        enemy/StaticEnemy.cpp
                         pathfinding/AStar.cpp
             )
 

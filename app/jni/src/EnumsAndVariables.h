@@ -38,13 +38,13 @@ namespace EnumsAndVars
     constexpr inline float bulletMass = 0.001f;
     constexpr inline glm::vec3 bulletGravity{0.0f, -10.0f, 0.0f};
     inline float shotTimeSec = -9999.0f;
-    constexpr inline float shotDelaySec = 0.04f;
+    constexpr inline float shotDelaySec = 0.05f;
 
     // Enemies.
     constexpr inline int enemiesMaxPathfindingInOneFrame = 10;
-    constexpr inline float enemiesMinDistanceToSpawn = 200.0f;
-    constexpr inline float enemiesMaxDistanceToSpawn = 500.0f;
-    constexpr inline float enemiesDisableDistance = 501.0f;
+    constexpr inline float enemiesMinDistanceToSpawn = 150.0f;
+    constexpr inline float enemiesMaxDistanceToSpawn = 450.0f;
+    constexpr inline float enemiesDistanceRespawnAfter = enemiesMaxDistanceToSpawn + 20.0f; // Respawn enemy closer if distance to player > ....
     inline int enemiesCurrentPathfindingIndex = 0;
     inline int enemiesKilledCount = 0;
 

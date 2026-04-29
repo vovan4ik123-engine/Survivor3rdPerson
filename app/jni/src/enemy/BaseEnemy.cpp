@@ -45,6 +45,8 @@ namespace Survivor3rdPerson
         ++BaseEnemy::m_activeEnemiesCount;
         m_isEnabled = true;
         unitState = UnitState::MOVE;
+        m_prepareToFirstAttack = true;
+        m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
     }
 
     void BaseEnemy::disableEnemy()

@@ -32,7 +32,7 @@ namespace Survivor3rdPerson
         void updatePathfindingAndSpawnEnemies();
         void spawnEnemies();
         void handlePlayerAttacks();
-        void updateEnemiesAndTheirsAttacks();
+        void handleEnemiesAttacks();
 
         std::shared_ptr<PlayStateGUILayer> m_gui;
 
@@ -40,12 +40,14 @@ namespace Survivor3rdPerson
 
         std::shared_ptr<Player> m_player;
         std::vector<PlayerBullet> m_playerBullets;
-        std::vector<MovableEnemy> m_movableEnemies;
+        std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesToSort; // This array will sorted many times.
+        std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesOriginalOrder; // This must keep always same order as loaded.
+        std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesToSpawn;
         std::vector<std::shared_ptr<Beryll::SceneObject>> m_animatedOrDynamicObjects;
         std::vector<std::shared_ptr<Beryll::BaseSimpleObject>> m_staticEnv;
         std::vector<std::shared_ptr<Beryll::BaseSimpleObject>> m_objWithNormalMap;
         std::vector<std::shared_ptr<Beryll::BaseSimpleObject>> m_simpleObjForShadowMap;
-        //std::vector<std::shared_ptr<Beryll::BaseAnimatedObject>> m_animatedObjForShadowMap;
+        std::vector<std::shared_ptr<Beryll::BaseAnimatedObject>> m_animatedObjForShadowMap;
 
         // Shaders and light.
         std::shared_ptr<Beryll::Shader> m_simpleObjSunLightShadows;
@@ -86,6 +88,7 @@ namespace Survivor3rdPerson
         std::vector<glm::ivec2> m_pathAllowedPositionsXZ; // Points for enemy movements.
         glm::ivec2 m_playerClosestAllowedPos{0}; // On m_allowedPointsToMoveXZ.
         std::vector<glm::ivec2> m_pointsToSpawnEnemies; // From m_allowedPointsToMoveXZ.
+        std::vector<glm::ivec2> m_pointsToSpawnEnemiesOnPlayerMoveDir; // From m_allowedPointsToMoveXZ.
         int m_pathFindingIteration = 0; // To separate complicated calculations between many frames.
 
         // Enemies waves.
@@ -95,7 +98,5 @@ namespace Survivor3rdPerson
         const float m_enemiesWave2Time = 4.0f;
         bool m_prepareWave3 = true;
         const float m_enemiesWave3Time = 6.0f;
-        bool m_prepareWave4 = true;
-        const float m_enemiesWave4Time = 8.0f;
     };
 }

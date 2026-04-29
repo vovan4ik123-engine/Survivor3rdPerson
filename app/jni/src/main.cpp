@@ -1,7 +1,10 @@
 #include "EngineHeaders.h"
 #include "GameStateHelper.h"
 
-// For static model in blender 36.6k triangles = 1mb FBX file size.
+// Dont triangulate meshes in blender.
+// If you triangulate meshes in blender it increases size of exported FBX file.
+// For not triangulated static model in blender 25k vertices = 49.5k triangles = 1mb FBX file size.
+// Before export you can use script in blender to round decimal precision of vertices coords.
 
 // Release instruction:
 // 1. Reset global vars in EnumsAndVars.h
@@ -20,7 +23,7 @@ int main(int argc, char* argv[])
 
     Beryll::GameLoop::create(Beryll::ScreenOrientation::MOBILE_LANDSCAPE_AND_FLIPPED);
 
-    Beryll::GameLoop::setFPSLimit(60.0f);
+    Beryll::GameLoop::setFPSLimit(120.0f);
 
     Beryll::Camera::setCameraFov(45.0f);
     Beryll::Camera::setProjectionNearClipPlane(5.0f);
