@@ -95,8 +95,8 @@ namespace Survivor3rdPerson
         bool m_prepareWave1 = true;
         const float m_enemiesWave1Time = 2.0f; // Sec.
         bool m_prepareWave2 = true;
-        const float m_enemiesWave2Time = 4.0f;
+        const float m_enemiesWave2Time = 10.0f;
         bool m_prepareWave3 = true;
-        const float m_enemiesWave3Time = 6.0f;
+        const float m_enemiesWave3Time = 20.0f;
     };
 }

@@ -114,34 +114,31 @@ namespace Survivor3rdPerson
 
         m_obj->getController().moveToPosition(m_currentPointToMove3DFloats, true, true);
 
-        if(m_obj->getController().getIsMoving())
+        // Already moving or no more point to move.
+        if(m_obj->getController().getIsMoving() || m_pathArrayIndexToMove + 1 >= m_pathArray.size())
             return;
 
-        //BR_INFO("%s", "MovableEnemy NOT   moving");
-        // Go to next point if exists.
-        if(m_pathArrayIndexToMove + 1 < m_pathArray.size())
+        //BR_INFO("%s", "MovableEnemy NOT moving. Look for new point to move.");
+        ++m_pathArrayIndexToMove;
+
+        m_currentPointToMove2DIntegers = m_pathArray[m_pathArrayIndexToMove];
+        float currentY = m_currentPointToMove3DFloats.y;
+        m_currentPointToMove3DFloats = glm::vec3(m_currentPointToMove2DIntegers.x,
+                                                 m_obj->getFromOriginToBottom(),
+                                                 m_currentPointToMove2DIntegers.y);
+
+        glm::vec3 rayFrom = m_currentPointToMove3DFloats;
+        rayFrom.y = currentY + 100.0f;
+        glm::vec3 rayTo = m_currentPointToMove3DFloats;
+        rayTo.y = currentY - 100.0f;
+        Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom,
+                                                                          rayTo,
+                                                                          Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
+                                                                          Beryll::CollisionGroups::STATIC_ENVIRONMENT);
+
+        if(rayHit)
         {
-            ++m_pathArrayIndexToMove;
-
-            m_currentPointToMove2DIntegers = m_pathArray[m_pathArrayIndexToMove];
-            float currentY = m_currentPointToMove3DFloats.y;
-            m_currentPointToMove3DFloats = glm::vec3(m_currentPointToMove2DIntegers.x,
-                                                     m_obj->getFromOriginToBottom(),
-                                                     m_currentPointToMove2DIntegers.y);
-
-            glm::vec3 rayFrom = m_currentPointToMove3DFloats;
-            rayFrom.y = currentY + 100.0f;
-            glm::vec3 rayTo = m_currentPointToMove3DFloats;
-            rayTo.y = currentY - 100.0f;
-            Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom,
-                                                                              rayTo,
-                                                                              Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                              Beryll::CollisionGroups::STATIC_ENVIRONMENT);
-
-            if(rayHit)
-            {
-                m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
-            }
+            m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
         }
     }
 
@@ -177,17 +174,5 @@ namespace Survivor3rdPerson
             m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
         else
             m_currentPointToMove3DFloats.y = m_obj->getFromOriginToBottom();
-
-//        m_startPointMoveFrom = glm::vec3(m_pathArray[0].x, 0.0f, m_pathArray[0].y);
-//
-//        glm::vec3 rayFrom2 = m_startPointMoveFrom;
-//        rayFrom2.y = 400.0f;
-//        glm::vec3 rayTo2 = m_startPointMoveFrom;
-//        rayTo2.y = -400.0f;
-//        Beryll::RayClosestHit rayHit2 = Beryll::Physics::castRayClosestHit(rayFrom2, rayTo2,
-//                                                                           Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-//                                                                           Beryll::CollisionGroups::STATIC_ENVIRONMENT);
-//        if(rayHit2)
-//            m_startPointMoveFrom.y = rayHit2.hitPoint.y + m_obj->getFromOriginToBottom();
     }
 }

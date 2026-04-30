@@ -89,7 +89,7 @@ namespace Survivor3rdPerson
 
                 if(so->getSceneObjectGroup() == Beryll::SceneObjectGroups::ENEMY)
                 {
-                    if(Beryll::Camera::getIsSeeObject(so->getOrigin()))
+                    if(Beryll::Camera::getIsSeeObject(so->getOrigin(), 1.2f))
                         so->enableDraw();
                     else
                         so->disableDraw();
@@ -627,7 +627,7 @@ namespace Survivor3rdPerson
 
                 if(m_movableEnemiesOriginalOrder[i]->getIsEnabled() && m_movableEnemiesOriginalOrder[i]->unitState != UnitState::DYING)
                 {
-                    m_movableEnemiesOriginalOrder[i]->setPathArray(m_pathFinderEnemies.findPath(m_movableEnemiesOriginalOrder[i]->getCurrentPointToMove2DInt(), m_playerClosestAllowedPos, 7), 0);
+                    m_movableEnemiesOriginalOrder[i]->setPathArray(m_pathFinderEnemies.findPath(m_movableEnemiesOriginalOrder[i]->getCurrentPointToMove2DInt(), m_playerClosestAllowedPos, 6), 0);
                     m_pathFinderEnemies.addBlockedPosition(m_movableEnemiesOriginalOrder[i]->getCurrentPointToMove2DInt());
                     ++enemiesUpdated;
                 }
@@ -654,6 +654,8 @@ namespace Survivor3rdPerson
             int ghoulCount = 0;
             for(auto& enemy : m_movableEnemiesOriginalOrder)
             {
+                enemy->isCanBeSpawned = false;
+
                 if(skeletonCount < 100 && enemy->unitType == UnitType::ENEMY_1)
                 {
                     enemy->isCanBeSpawned = true;
@@ -677,6 +679,8 @@ namespace Survivor3rdPerson
             int ghoulCount = 0;
             for(auto& enemy : m_movableEnemiesOriginalOrder)
             {
+                enemy->isCanBeSpawned = false;
+
                 if(skeletonCount < 200 && enemy->unitType == UnitType::ENEMY_1)
                 {
                     enemy->isCanBeSpawned = true;
@@ -700,6 +704,8 @@ namespace Survivor3rdPerson
             int ghoulCount = 0;
             for(auto& enemy : m_movableEnemiesOriginalOrder)
             {
+                enemy->isCanBeSpawned = false;
+
                 if(skeletonCount < 300 && enemy->unitType == UnitType::ENEMY_1)
                 {
                     enemy->isCanBeSpawned = true;
@@ -728,6 +734,7 @@ namespace Survivor3rdPerson
         m_movableEnemiesToSpawn.clear();
         int mostFarCountRespawned = 0;
         const int maxAllowedCountToRespawn = int(BaseEnemy::getActiveCount() / 8); // Respawn max ~12% of all active enemies.
+        //BR_INFO("BaseEnemy::getActiveCount(): %d maxAllowedCountToRespawn: %d", BaseEnemy::getActiveCount(), maxAllowedCountToRespawn);
         for(const auto& enemy : m_movableEnemiesToSort)
         {
             // Always spawn disabled enemies that can be spawned. Usually after was killed.
@@ -738,7 +745,9 @@ namespace Survivor3rdPerson
             if(enemy->getIsEnabled() && enemy->unitState == UnitState::MOVE && enemy->spawnTime + 5.0f < EnumsAndVars::mapPlayTimeSec)
             {
                 // Always respawn some most far enabled enemies from player.
-                if(mostFarCountRespawned < maxAllowedCountToRespawn)
+                if(mostFarCountRespawned < maxAllowedCountToRespawn &&
+                   (!Beryll::Camera::getIsSeeObject(enemy->getObj()->getOrigin(), 1.2f) ||
+                   glm::distance(m_player->getOrigin(), enemy->getObj()->getOrigin()) > 250.0f))
                 {
                     ++mostFarCountRespawned;
                     m_movableEnemiesToSpawn.push_back(enemy);
@@ -770,7 +779,7 @@ namespace Survivor3rdPerson
                 spawnPoint2D = m_pointsToSpawnEnemies[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemies.size() - 1)];
             }
 
-            enemyToSpawn->setPathArray(m_pathFinderEnemies.findPath(spawnPoint2D, m_playerClosestAllowedPos, 7), 1);
+            enemyToSpawn->setPathArray(m_pathFinderEnemies.findPath(spawnPoint2D, m_playerClosestAllowedPos, 6), 1);
             m_pathFinderEnemies.addBlockedPosition(enemyToSpawn->getCurrentPointToMove2DInt());
 
             glm::vec3 spawnPoint3D{spawnPoint2D.x, 0.0f, spawnPoint2D.y};

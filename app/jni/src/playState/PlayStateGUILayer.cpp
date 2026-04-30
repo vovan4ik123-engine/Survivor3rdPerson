@@ -12,11 +12,11 @@ namespace Survivor3rdPerson
 
         if(m_statisticsShow)
         {
-            m_statistics1 = Beryll::Renderer::createGUIText("", glm::vec3{0.06f, 0.06f, 0.06f}, glm::vec3{6.5f, 96.3f, 0.0f}, 3.0f);
+            m_statistics1 = Beryll::Renderer::createGUIText("", glm::vec3{0.06f, 0.06f, 0.06f}, glm::vec3{1.0f, 96.3f, 0.0f}, 3.0f);
             m_guiObjects.push_back(m_statistics1);
-            m_statistics2 = Beryll::Renderer::createGUIText("", glm::vec3{0.06f, 0.06f, 0.06f}, glm::vec3{6.5f, 92.3f, 0.0f}, 3.0f);
+            m_statistics2 = Beryll::Renderer::createGUIText("", glm::vec3{0.06f, 0.06f, 0.06f}, glm::vec3{0.1f, 92.3f, 0.0f}, 3.0f);
             m_guiObjects.push_back(m_statistics2);
-            m_statistics3 = Beryll::Renderer::createGUIText("", glm::vec3{0.06f, 0.06f, 0.06f}, glm::vec3{6.5f, 88.3f, 0.0f}, 3.0f);
+            m_statistics3 = Beryll::Renderer::createGUIText("", glm::vec3{0.06f, 0.06f, 0.06f}, glm::vec3{0.1f, 88.3f, 0.0f}, 3.0f);
             m_guiObjects.push_back(m_statistics3);
         }
 
