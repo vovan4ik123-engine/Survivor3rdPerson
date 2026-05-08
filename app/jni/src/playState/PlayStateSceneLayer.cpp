@@ -18,16 +18,17 @@ namespace Survivor3rdPerson
         m_animatedObjForShadowMap.reserve(1100);
         m_simpleObjForShadowMap.reserve(300);
 
+        m_pathFinder = std::make_shared<AStar>(m_mapMinX, m_mapMaxX, m_mapMinZ, m_mapMaxZ, EnumsAndVars::pathFinderStep);
+
         loadPlayer();
         loadEnv();
         loadEnemies();
         loadShadersAndLight();
 
-        m_pathFinderEnemies = AStar(m_mapMinX, m_mapMaxX, m_mapMinZ, m_mapMaxZ, 10);
 //        std::vector<glm::vec3> walls = BeryllUtils::Common::loadMeshVerticesToVector("models3D/map1/PathEnemiesWalls.fbx");
 //        for(const auto& wall : walls)
 //        {
-//            m_pathFinderEnemies.addWallPosition({(int)std::roundf(wall.x), (int)std::roundf(wall.z)});
+//            m_pathFinder->addWallPosition({(int)std::roundf(wall.x), (int)std::roundf(wall.z)});
 //        }
 //
 //        BR_INFO("Map1 pathfinder walls: %d", walls.size());
@@ -223,7 +224,7 @@ namespace Survivor3rdPerson
                                             Beryll::SceneObjectGroups::PLAYER,
                                             EnumsAndVars::playerStartHP);
 
-        m_player->setOrigin(glm::vec3(-650.0f, m_player->getFromOriginToBottom(), -530.0f));
+        m_player->setOrigin(glm::vec3(-644.0f, m_player->getFromOriginToBottom(), -528.0f));
         m_player->getController().moveSpeed = 50.0f;
         m_player->setGravity(EnumsAndVars::playerGravity);
         m_player->setAngularFactor(glm::vec3(0.0f));
@@ -243,6 +244,7 @@ namespace Survivor3rdPerson
                                 Beryll::SceneObjectGroups::BULLET);
 
             m_animatedOrDynamicObjects.push_back(bullet.getObj());
+            m_simpleObjForShadowMap.push_back(bullet.getObj());
             m_playerBullets.push_back(bullet);
         }
     }
@@ -313,13 +315,13 @@ namespace Survivor3rdPerson
                                                                                     Beryll::CollisionGroups::MOVABLE_ENEMY,
                                                                                     Beryll::CollisionGroups::PLAYER_BULLET,
                                                                                     Beryll::SceneObjectGroups::ENEMY,
-                                                                                    1.0f);
+                                                                                    1.0f,
+                                                                                    m_pathFinder);
 
             skeleton->getObj()->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
             skeleton->getObj()->setDefaultAnimationByIndex(EnumsAndVars::AnimationIndexes::stand);
             skeleton->unitType = UnitType::ENEMY_1;
             skeleton->attackSound = SoundType::NONE;
-            skeleton->attackHitSound = SoundType::NONE;
             skeleton->dieSound = SoundType::NONE;
 
             skeleton->damage = 1.0f;
@@ -335,7 +337,7 @@ namespace Survivor3rdPerson
             m_animatedObjForShadowMap.push_back(skeleton->getObj());
         }
 
-        for(int i = 0; i < 250; ++i)
+        for(int i = 0; i < 200; ++i)
         {
             auto ghoul = std::make_shared<MovableEnemy>("models3D/enemies/GhoulBones.fbx",
                                                                                  0.0f,
@@ -344,13 +346,13 @@ namespace Survivor3rdPerson
                                                                                  Beryll::CollisionGroups::MOVABLE_ENEMY,
                                                                                  Beryll::CollisionGroups::PLAYER_BULLET,
                                                                                  Beryll::SceneObjectGroups::ENEMY,
-                                                                                 1.0f);
+                                                                                 1.0f,
+                                                                                 m_pathFinder);
 
             ghoul->getObj()->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
             ghoul->getObj()->setDefaultAnimationByIndex(EnumsAndVars::AnimationIndexes::stand);
             ghoul->unitType = UnitType::ENEMY_2;
             ghoul->attackSound = SoundType::NONE;
-            ghoul->attackHitSound = SoundType::NONE;
             ghoul->dieSound = SoundType::NONE;
 
             ghoul->damage = 1.0f;
@@ -558,39 +560,23 @@ namespace Survivor3rdPerson
 
     void PlayStateSceneLayer::updatePathfindingAndSpawnEnemies()
     {
-        m_pointsToSpawnEnemies.clear();
-        m_pointsToSpawnEnemiesOnPlayerMoveDir.clear();
+        // Calculate closest point to player.
+        m_playerClosestAllowedPos.x = (int)std::roundf(m_player->getOrigin().x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
+        m_playerClosestAllowedPos.y = (int)std::roundf(m_player->getOrigin().z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
 
-        // Find closest point to player.
-        glm::vec2 playerPosXZ{m_player->getOrigin().x, m_player->getOrigin().z};
-        float distanceToClosestPoint = std::numeric_limits<float>::max();
-        float distanceToCurrent = 0.0f;
-
-        for(const glm::ivec2& point : m_pathAllowedPositionsXZ)
+        // Calculate spawn points and spawn enemies if time.
+        if(BaseEnemy::lastSpawnOrRespawnTime + BaseEnemy::spawnOrRespawnDelay < EnumsAndVars::mapPlayTimeSec)
         {
-            distanceToCurrent = glm::distance(playerPosXZ, glm::vec2(float(point.x), float(point.y)));
+            BaseEnemy::lastSpawnOrRespawnTime = EnumsAndVars::mapPlayTimeSec;
 
-            if(distanceToCurrent < distanceToClosestPoint)
-            {
-                distanceToClosestPoint = distanceToCurrent;
-                m_playerClosestAllowedPos = point;
-            }
-        }
+            m_pointsToSpawnEnemies.clear();
+            m_pointsToSpawnEnemiesOnPlayerMoveDir.clear();
 
-        // Then divide spawn enemies + path finding to many frames.
-        // In first frame:
-        // 1. Clear blocked positions.
-        // 2. Find allowed points to spawn enemies.
-        // 3. Spawn enemies.
-        if(m_pathFindingIteration == 0)
-        {
-            ++m_pathFindingIteration;
-            // 1.
-            m_pathFinderEnemies.clearBlockedPositions();
-
-            // 2.
+            // Find allowed points to spawn enemies.
             glm::vec2 playerMoveDirXZ{m_player->getController().getMoveDir().x, m_player->getController().getMoveDir().z};
             playerMoveDirXZ = glm::normalize(playerMoveDirXZ);
+            glm::vec2 playerPosXZ{m_player->getOrigin().x, m_player->getOrigin().z};
+            float distanceToCurrent = 0.0f;
             for(const glm::ivec2& point : m_pathAllowedPositionsXZ)
             {
                 distanceToCurrent = glm::distance(playerPosXZ, glm::vec2(float(point.x), float(point.y)));
@@ -603,7 +589,7 @@ namespace Survivor3rdPerson
                     if(m_player->getController().getIsMoving())
                     {
                         glm::vec2 pointDirXZ = glm::vec2(float(point.x), float(point.y)) - playerPosXZ;
-                        if(BeryllUtils::Common::getAngleInRadians(playerMoveDirXZ, glm::normalize(pointDirXZ)) < 2.0f)
+                        if(BeryllUtils::Common::getAngleInRadians(playerMoveDirXZ, glm::normalize(pointDirXZ)) < 1.0f)
                             m_pointsToSpawnEnemiesOnPlayerMoveDir.push_back(point);
                     }
                 }
@@ -611,35 +597,33 @@ namespace Survivor3rdPerson
 
             BR_ASSERT((!m_pointsToSpawnEnemies.empty()), "%s", "m_allowedPointsToSpawnEnemies empty.");
 
-            // 3.
-            spawnEnemies();
+            spawnEnemies(); // spawnEnemies() is big job. Dont do anything more related to spawn/pathFinding in this frame.
+
+            return; // From method.
         }
-        // In second frame:
-        // 1. Update paths for enemies. For EnumsAndVars::enemiesMaxPathfindingInOneFrame enemies in one frame.
-        else if(m_pathFindingIteration == 1)
+
+        // Update path finding.
+        int enemiesUpdated = 0;
+        int& i = EnumsAndVars::enemiesCurrentPathfindingIndex;
+        for( ; i < m_movableEnemiesOriginalOrder.size(); ++i)
         {
-            int enemiesUpdated = 0;
-            int& i = EnumsAndVars::enemiesCurrentPathfindingIndex;
-            for( ; i < m_movableEnemiesOriginalOrder.size(); ++i)
-            {
-                if(enemiesUpdated >= EnumsAndVars::enemiesMaxPathfindingInOneFrame)
-                    break;
+            if(enemiesUpdated >= EnumsAndVars::enemiesMaxPathfindingInOneFrame)
+                break;
 
-                if(m_movableEnemiesOriginalOrder[i]->getIsEnabled() && m_movableEnemiesOriginalOrder[i]->unitState != UnitState::DYING)
-                {
-                    m_movableEnemiesOriginalOrder[i]->setPathArray(m_pathFinderEnemies.findPath(m_movableEnemiesOriginalOrder[i]->getCurrentPointToMove2DInt(), m_playerClosestAllowedPos, 6), 0);
-                    m_pathFinderEnemies.addBlockedPosition(m_movableEnemiesOriginalOrder[i]->getCurrentPointToMove2DInt());
-                    ++enemiesUpdated;
-                }
-            }
-
-            if(EnumsAndVars::enemiesCurrentPathfindingIndex >= m_movableEnemiesOriginalOrder.size())
+            if(m_movableEnemiesOriginalOrder[i]->getIsEnabled() && m_movableEnemiesOriginalOrder[i]->unitState != UnitState::DYING)
             {
-                // All enemies were updated.
-                //BR_INFO("Path for all enemies updated. Last index: %d", EnumsAndVariables::enemiesCurrentPathfindingIndex);
-                EnumsAndVars::enemiesCurrentPathfindingIndex = 0;
-                m_pathFindingIteration = 0; // Start from start again in next frame.
+                if(m_movableEnemiesOriginalOrder[i]->pathUpdateTime + 1.0f < EnumsAndVars::mapPlayTimeSec)
+                    m_movableEnemiesOriginalOrder[i]->findPath(m_playerClosestAllowedPos);
+
+                ++enemiesUpdated;
             }
+        }
+
+        if(EnumsAndVars::enemiesCurrentPathfindingIndex >= m_movableEnemiesOriginalOrder.size())
+        {
+            // All enemies were updated.
+            //BR_INFO("Path for all enemies updated. Last index: %d", EnumsAndVariables::enemiesCurrentPathfindingIndex);
+            EnumsAndVars::enemiesCurrentPathfindingIndex = 0;
         }
     }
 
@@ -662,7 +646,7 @@ namespace Survivor3rdPerson
                     ++skeletonCount;
                 }
 
-                if(ghoulCount < 75 && enemy->unitType == UnitType::ENEMY_2)
+                if(ghoulCount < 70 && enemy->unitType == UnitType::ENEMY_2)
                 {
                     enemy->isCanBeSpawned = true;
                     ++ghoulCount;
@@ -687,7 +671,7 @@ namespace Survivor3rdPerson
                     ++skeletonCount;
                 }
 
-                if(ghoulCount < 150 && enemy->unitType == UnitType::ENEMY_2)
+                if(ghoulCount < 140 && enemy->unitType == UnitType::ENEMY_2)
                 {
                     enemy->isCanBeSpawned = true;
                     ++ghoulCount;
@@ -712,7 +696,7 @@ namespace Survivor3rdPerson
                     ++skeletonCount;
                 }
 
-                if(ghoulCount < 225 && enemy->unitType == UnitType::ENEMY_2)
+                if(ghoulCount < 200 && enemy->unitType == UnitType::ENEMY_2)
                 {
                     enemy->isCanBeSpawned = true;
                     ++ghoulCount;
@@ -732,8 +716,8 @@ namespace Survivor3rdPerson
 
         // Spawn enemies.
         m_movableEnemiesToSpawn.clear();
-        int mostFarCountRespawned = 0;
-        const int maxAllowedCountToRespawn = int(BaseEnemy::getActiveCount() / 8); // Respawn max ~12% of all active enemies.
+        int mostFarRespawnedCount = 0;
+        const int maxAllowedCountToRespawn = int(BaseEnemy::getActiveCount() / 7) + 1; // Respawn max 1/7 of all active enemies.
         //BR_INFO("BaseEnemy::getActiveCount(): %d maxAllowedCountToRespawn: %d", BaseEnemy::getActiveCount(), maxAllowedCountToRespawn);
         for(const auto& enemy : m_movableEnemiesToSort)
         {
@@ -742,14 +726,14 @@ namespace Survivor3rdPerson
                 m_movableEnemiesToSpawn.push_back(enemy);
 
             // Then respawn enabled enemies if need.
-            if(enemy->getIsEnabled() && enemy->unitState == UnitState::MOVE && enemy->spawnTime + 5.0f < EnumsAndVars::mapPlayTimeSec)
+            if(enemy->getIsEnabled() && enemy->unitState == UnitState::MOVE && enemy->spawnTime + 3.0f < EnumsAndVars::mapPlayTimeSec)
             {
                 // Always respawn some most far enabled enemies from player.
-                if(mostFarCountRespawned < maxAllowedCountToRespawn &&
+                if(mostFarRespawnedCount < maxAllowedCountToRespawn &&
                    (!Beryll::Camera::getIsSeeObject(enemy->getObj()->getOrigin(), 1.2f) ||
-                   glm::distance(m_player->getOrigin(), enemy->getObj()->getOrigin()) > 250.0f))
+                   glm::distance(m_player->getOrigin(), enemy->getObj()->getOrigin()) > 300.0f))
                 {
-                    ++mostFarCountRespawned;
+                    ++mostFarRespawnedCount;
                     m_movableEnemiesToSpawn.push_back(enemy);
                 }
                 else // Continue check distance threshold to respawn.
@@ -763,12 +747,11 @@ namespace Survivor3rdPerson
         //int spawnedCount = 0;
         for(auto& enemyToSpawn : m_movableEnemiesToSpawn)
         {
-            if(!enemyToSpawn->getIsEnabled())
-                enemyToSpawn->enableEnemy();
-
             //++spawnedCount;
             glm::ivec2 spawnPoint2D{0};
-            if(m_player->getController().getIsMoving() && m_pointsToSpawnEnemiesOnPlayerMoveDir.size() >= 10 && Beryll::RandomGenerator::getFloat() > 0.5f)
+            if(m_player->getController().getIsMoving() &&
+               m_pointsToSpawnEnemiesOnPlayerMoveDir.size() >= 10 &&
+               Beryll::RandomGenerator::getFloat() > 0.5f)
             {
                 // Spawn close to player move dir.
                 spawnPoint2D = m_pointsToSpawnEnemiesOnPlayerMoveDir[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemiesOnPlayerMoveDir.size() - 1)];
@@ -779,22 +762,8 @@ namespace Survivor3rdPerson
                 spawnPoint2D = m_pointsToSpawnEnemies[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemies.size() - 1)];
             }
 
-            enemyToSpawn->setPathArray(m_pathFinderEnemies.findPath(spawnPoint2D, m_playerClosestAllowedPos, 6), 1);
-            m_pathFinderEnemies.addBlockedPosition(enemyToSpawn->getCurrentPointToMove2DInt());
-
-            glm::vec3 spawnPoint3D{spawnPoint2D.x, 0.0f, spawnPoint2D.y};
-            glm::vec3 rayFrom{spawnPoint3D.x, 400.0f, spawnPoint3D.z};
-            glm::vec3 rayTo{spawnPoint3D.x, -400.0f, spawnPoint3D.z};
-            Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom, rayTo,
-                                                                               Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                               Beryll::CollisionGroups::STATIC_ENVIRONMENT);
-            if(rayHit)
-                spawnPoint3D.y = rayHit.hitPoint.y + enemyToSpawn->getObj()->getFromOriginToBottom();
-            else
-                spawnPoint3D.y = enemyToSpawn->getObj()->getFromOriginToBottom();
-
-            enemyToSpawn->getObj()->setOrigin(spawnPoint3D);
-            enemyToSpawn->spawnTime = EnumsAndVars::mapPlayTimeSec;
+            enemyToSpawn->spawn(spawnPoint2D);
+            enemyToSpawn->findPath(m_playerClosestAllowedPos);
         }
 
         //BR_INFO("spawned: %d", spawnedCount);
@@ -812,7 +781,6 @@ namespace Survivor3rdPerson
                 {
                     m_movableEnemiesOriginalOrder[collisionID - m_enemiesFirstID]->takeDamage(1.0f);
 
-                    Sounds::playSoundEffect(SoundType::BULLET_HIT);
                     // Damage on screen.
                     int number = Beryll::RandomGenerator::getInt(1000) + 1;
                     float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), bullet.getObj()->getOrigin()) * 0.03f);
@@ -826,8 +794,6 @@ namespace Survivor3rdPerson
                                                                     Beryll::RandomGenerator::getFloat() * 3.0f + 2.0f,
                                                                     Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
                                                           50.0f);
-
-                    EnumsAndVars::playerTotalDamage += number;
                 }
             }
         }

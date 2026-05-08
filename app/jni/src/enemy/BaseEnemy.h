@@ -32,9 +32,7 @@ namespace Survivor3rdPerson
                   const float HP);
         virtual ~BaseEnemy();
         
-        virtual void update(const glm::vec3& playerOrigin) = 0;
-        void attack(const glm::vec3& playerOrigin);
-        virtual void setPathArray(std::vector<glm::ivec2> pathArray, const int indexToMove) = 0; // Implement for MovableEnemy.
+        virtual void update(const glm::vec3& playerOrigin) = 0; // Can be different for different subclasses.
 
         std::shared_ptr<Beryll::AnimatedCollidingCharacter> getObj() { return m_obj; }
         int getObjID() { return m_objID; }
@@ -46,15 +44,16 @@ namespace Survivor3rdPerson
         bool getIsTimeToAttack() { return (m_lastAttackTime + timeBetweenAttacks) < EnumsAndVars::mapPlayTimeSec; }
         bool getIsDelayBeforeFirstAttack() { return (m_prepareToFirstAttackStartTime + timeBetweenAttacks) > EnumsAndVars::mapPlayTimeSec; }
         void takeDamage(const float damag) { m_currentHP -= damag; }
+        void spawn(glm::ivec2 spawnPoint2D);
+        void attack(const glm::vec3& playerOrigin);
 
-        glm::ivec2 getCurrentPointToMove2DInt() { return m_currentPointToMove2DIntegers; };
-
+        static float lastSpawnOrRespawnTime; // Track spawn time in sec for all enemies.
+        static float spawnOrRespawnDelay; // Time in sec.
         UnitState unitState = UnitState::MOVE;
         UnitType unitType = UnitType::NONE;
         SoundType attackSound = SoundType::NONE;
-        SoundType attackHitSound = SoundType::NONE;
         SoundType dieSound = SoundType::NONE;
-        float spawnTime = -99999.0f;
+        float spawnTime = -99999.0f; // Track spawn time for specific enemy.
 
         bool isCanBeSpawned = false;
 
@@ -72,7 +71,7 @@ namespace Survivor3rdPerson
         int m_objID = 0;
 
         static int m_activeEnemiesCount;
-        bool m_isEnabled = false;
+        bool m_isEnabled = true;
 
         // Attack data.
         float m_lastAttackTime = -9999.0f; // Sec.
@@ -82,11 +81,5 @@ namespace Survivor3rdPerson
         // HP.
         float m_maxHP = 0.0f;
         float m_currentHP = 0.0f;
-
-        // Pathfinding.
-        std::vector<glm::ivec2> m_pathArray; // On XZ plane. INTEGER values.
-        int m_pathArrayIndexToMove = 0;
-        glm::ivec2 m_currentPointToMove2DIntegers{0};
-        glm::vec3 m_currentPointToMove3DFloats{0.0f};
     };
 }

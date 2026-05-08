@@ -32,7 +32,6 @@ namespace EnumsAndVars
     constexpr inline float playerMass = 1.0f;
     constexpr inline float playerStartHP = 100.0f;
     constexpr inline glm::vec3 playerGravity{0.0f, -70.0f, 0.0f};
-    inline int playerTotalDamage = 0;
 
     // Player bullet.
     constexpr inline float bulletMass = 0.001f;
@@ -43,25 +42,25 @@ namespace EnumsAndVars
     // Enemies.
     constexpr inline int enemiesMaxPathfindingInOneFrame = 10;
     constexpr inline float enemiesMinDistanceToSpawn = 150.0f;
-    constexpr inline float enemiesMaxDistanceToSpawn = 450.0f;
-    constexpr inline float enemiesDistanceRespawnAfter = enemiesMaxDistanceToSpawn + 20.0f; // Respawn enemy closer if distance to player > ....
+    constexpr inline float enemiesMaxDistanceToSpawn = 500.0f;
+    constexpr inline float enemiesDistanceRespawnAfter = enemiesMaxDistanceToSpawn + 10.0f; // Respawn enemy closer if distance to player > ....
     inline int enemiesCurrentPathfindingIndex = 0;
-    inline int enemiesKilledCount = 0;
 
     // Play.
     inline float mapPlayTimeSec = 0.0f;
 
+    // Path finding.
+    constexpr inline int pathFinderStep = 10;
+
     inline void reset()
     {
         // Player.
-        playerTotalDamage = 0;
 
         // Player bullet.
         shotTimeSec = -9999.0;
 
         // Enemies.
         enemiesCurrentPathfindingIndex = 0;
-        enemiesKilledCount = 0;
 
         // Play.
         mapPlayTimeSec = 0.0f;

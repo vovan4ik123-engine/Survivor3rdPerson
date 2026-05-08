@@ -46,6 +46,16 @@ namespace Survivor3rdPerson
         }
     }
 
+    void AStar::removeBlockedPosition(glm::ivec2 pos)
+    {
+        auto it = std::find(m_blockedPositions.begin(), m_blockedPositions.end(), pos);
+        if (it != m_blockedPositions.end())
+        {
+            std::swap(*it, m_blockedPositions.back()); // Put target at the end.
+            m_blockedPositions.pop_back();             // Remove the end.
+        }
+    }
+
     bool AStar::isCollisionWithWallOrBlocked(glm::ivec2 coords)
     {
         if(std::find(m_blockedPositions.begin(), m_blockedPositions.end(), coords) != m_blockedPositions.end() ||
@@ -77,7 +87,7 @@ namespace Survivor3rdPerson
                 {
                     current = &node;
                 }
-                else if(node.nodeInOpenSet && node.F <= current->F)
+                else if(current != nullptr && node.nodeInOpenSet && node.F <= current->F)
                 {
                     current = &node;
                 }

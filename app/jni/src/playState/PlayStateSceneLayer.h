@@ -84,12 +84,11 @@ namespace Survivor3rdPerson
         float m_mapMaxZ = 800.0f;
 
         // Pathfinding for enemies.
-        AStar m_pathFinderEnemies; // Assign new object with map size in constructor of specific map.
+        std::shared_ptr<AStar> m_pathFinder; // Assign new object with map size in constructor of specific map.
         std::vector<glm::ivec2> m_pathAllowedPositionsXZ; // Points for enemy movements.
         glm::ivec2 m_playerClosestAllowedPos{0}; // On m_allowedPointsToMoveXZ.
         std::vector<glm::ivec2> m_pointsToSpawnEnemies; // From m_allowedPointsToMoveXZ.
         std::vector<glm::ivec2> m_pointsToSpawnEnemiesOnPlayerMoveDir; // From m_allowedPointsToMoveXZ.
-        int m_pathFindingIteration = 0; // To separate complicated calculations between many frames.
 
         // Enemies waves.
         bool m_prepareWave1 = true;

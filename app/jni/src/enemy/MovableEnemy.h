@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseEnemy.h"
+#include "pathfinding/AStar.h"
 
 namespace Survivor3rdPerson
 {
@@ -15,14 +16,26 @@ namespace Survivor3rdPerson
                      Beryll::CollisionGroups collGroup,
                      Beryll::CollisionGroups collMask,
                      Beryll::SceneObjectGroups sceneGroup,
-                     float HP);
+                     float HP,
+                     std::shared_ptr<AStar> pathFinder);
         ~MovableEnemy() override;
 
         void update(const glm::vec3& playerOrigin) override;
-        void setPathArray(std::vector<glm::ivec2> pathArray, const int indexToMove) override;
+        void findPath(glm::ivec2 destinationPoint);
+        float pathUpdateTime = -99999.0f; // Track path update time for specific enemy.
 
     protected:
+
+    private:
         void move() override;
-        float m_timeDie = 0.0f;
+
+        // Pathfinding.
+        std::shared_ptr<AStar> m_pathFinder;
+        std::vector<glm::ivec2> m_pathArray; // On XZ plane. INTEGER values.
+        int m_pathArrayIndexToMove = 0;
+        glm::ivec2 m_currentPointToMove2DIntegers{std::numeric_limits<int>::min()};
+        glm::vec3 m_currentPointToMove3DFloats{0.0f};
+        void removePointToMoveFromBlocked();
+
     };
 }

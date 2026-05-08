@@ -3,6 +3,8 @@
 namespace Survivor3rdPerson
 {
     int BaseEnemy::m_activeEnemiesCount = 0;
+    float BaseEnemy::lastSpawnOrRespawnTime = -99999.0f;
+    float BaseEnemy::spawnOrRespawnDelay = 0.7f;
 
     BaseEnemy::BaseEnemy(const char* filePath,
                          float collisionMassKg,
@@ -36,6 +38,9 @@ namespace Survivor3rdPerson
 
     void BaseEnemy::enableEnemy()
     {
+        if(m_isEnabled)
+            return;
+
         m_obj->enableDraw();
         m_obj->enableUpdate();
         m_obj->enableCollisionMesh();
@@ -51,6 +56,9 @@ namespace Survivor3rdPerson
 
     void BaseEnemy::disableEnemy()
     {
+        if(!m_isEnabled)
+            return;
+
         m_obj->disableDraw();
         m_obj->disableUpdate();
         m_obj->disableCollisionMesh();
@@ -64,6 +72,26 @@ namespace Survivor3rdPerson
         m_prepareToFirstAttack = true;
     }
 
+    void BaseEnemy::spawn(glm::ivec2 spawnPoint2D)
+    {
+        if(!getIsEnabled())
+            enableEnemy();
+
+        glm::vec3 spawnPoint3D{spawnPoint2D.x, 0.0f, spawnPoint2D.y};
+        glm::vec3 rayFrom{spawnPoint3D.x, 400.0f, spawnPoint3D.z};
+        glm::vec3 rayTo{spawnPoint3D.x, -400.0f, spawnPoint3D.z};
+        Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom, rayTo,
+                                                                          Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
+                                                                          Beryll::CollisionGroups::STATIC_ENVIRONMENT);
+        if(rayHit)
+            spawnPoint3D.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
+        else
+            spawnPoint3D.y = m_obj->getFromOriginToBottom();
+
+        m_obj->setOrigin(spawnPoint3D);
+        spawnTime = EnumsAndVars::mapPlayTimeSec;
+    }
+
     void BaseEnemy::attack(const glm::vec3& playerOrigin)
     {
         //BR_INFO("%s", "BaseEnemy::attack()");
@@ -71,8 +99,5 @@ namespace Survivor3rdPerson
         m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::attack, true, true);
         m_lastAttackTime = EnumsAndVars::mapPlayTimeSec;
         unitState = UnitState::ATTACKING;
-
-        Sounds::playSoundEffect(attackSound);
-        Sounds::playSoundEffect(attackHitSound);
     }
 }

@@ -32,7 +32,8 @@ namespace Survivor3rdPerson
 
         void addWallPosition(glm::ivec2 wall);
         void addBlockedPosition(glm::ivec2 pos);
-        void clearBlockedPositions() { m_blockedPositions.clear(); }
+        void removeBlockedPosition(glm::ivec2 pos);
+        void clearAllBlockedPositions() { m_blockedPositions.clear(); }
         std::vector<glm::ivec2> findPath(const glm::ivec2 start, const glm::ivec2 end, const int pathNodeMaxCount = -1); // -1 = return all nodes from start to end.
 
     private:

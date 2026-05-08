@@ -9,7 +9,8 @@ namespace Survivor3rdPerson
                                Beryll::CollisionGroups collGroup,
                                Beryll::CollisionGroups collMask,
                                Beryll::SceneObjectGroups sceneGroup,
-                               float HP)
+                               float HP,
+                               std::shared_ptr<AStar> pathFinder)
                                  : BaseEnemy(filePath,
                                              collisionMassKg,
                                              wantCollisionCallBack,
@@ -20,6 +21,7 @@ namespace Survivor3rdPerson
                                              HP)
     {
         unitState = UnitState::MOVE;
+        m_pathFinder = std::move(pathFinder);
     }
 
     MovableEnemy::~MovableEnemy()
@@ -38,11 +40,10 @@ namespace Survivor3rdPerson
         }
         else if(m_currentHP <= 0.0f)
         {
-            ++EnumsAndVars::enemiesKilledCount;
             m_obj->setCurrentAnimationByIndex(3 + Beryll::RandomGenerator::getInt(2), true, false, false);
             unitState = UnitState::DYING;
             m_obj->disableCollisionMesh();
-            m_timeDie = Beryll::TimeStep::getSecFromStart();
+            removePointToMoveFromBlocked();
             return;
         }
 
@@ -114,53 +115,58 @@ namespace Survivor3rdPerson
 
         m_obj->getController().moveToPosition(m_currentPointToMove3DFloats, true, true);
 
-        // Already moving or no more point to move.
-        if(m_obj->getController().getIsMoving() || m_pathArrayIndexToMove + 1 >= m_pathArray.size())
+        if(m_obj->getController().getIsMoving()) // Already moving.
             return;
 
-        //BR_INFO("%s", "MovableEnemy NOT moving. Look for new point to move.");
-        ++m_pathArrayIndexToMove;
+        // Not moving. Current point to move reached. Delete it from path finder.
+        removePointToMoveFromBlocked();
 
+        if(m_pathArrayIndexToMove + 1 >= m_pathArray.size()) // No more points to move.
+            return;
+
+        // Find new point to move.
+        ++m_pathArrayIndexToMove;
         m_currentPointToMove2DIntegers = m_pathArray[m_pathArrayIndexToMove];
+        m_pathFinder->addBlockedPosition(m_currentPointToMove2DIntegers);
+
         float currentY = m_currentPointToMove3DFloats.y;
         m_currentPointToMove3DFloats = glm::vec3(m_currentPointToMove2DIntegers.x,
                                                  m_obj->getFromOriginToBottom(),
                                                  m_currentPointToMove2DIntegers.y);
 
         glm::vec3 rayFrom = m_currentPointToMove3DFloats;
-        rayFrom.y = currentY + 100.0f;
+        rayFrom.y += 200.0f;
         glm::vec3 rayTo = m_currentPointToMove3DFloats;
-        rayTo.y = currentY - 100.0f;
+        rayTo.y -= 200.0f;
         Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom,
                                                                           rayTo,
                                                                           Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
                                                                           Beryll::CollisionGroups::STATIC_ENVIRONMENT);
 
         if(rayHit)
-        {
             m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
-        }
     }
 
-    void MovableEnemy::setPathArray(std::vector<glm::ivec2> pathArray, const int indexToMove)
+    void MovableEnemy::findPath(glm::ivec2 destinationPoint)
     {
-        if(pathArray.empty() || indexToMove < 0)
+        // Remove old point to move.
+        removePointToMoveFromBlocked();
+
+        glm::ivec2 closestXZ{std::roundf(m_obj->getOrigin().x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep,
+                             std::roundf(m_obj->getOrigin().z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep};
+
+        m_pathArray = m_pathFinder->findPath(closestXZ, destinationPoint, 6);
+        pathUpdateTime = EnumsAndVars::mapPlayTimeSec;
+
+        if(m_pathArray.empty())
         {
-            BR_ASSERT(false, "%s", "pathArray.empty() or pathArrayIndexToMove < 0");
+            BR_ASSERT(false, "%s", "m_pathArray.empty()");
         }
 
-        m_pathArray = std::move(pathArray);
-
-        if(indexToMove >= m_pathArray.size())
-        {
-            m_pathArrayIndexToMove = m_pathArray.size() - 1;
-        }
-        else
-        {
-            m_pathArrayIndexToMove = indexToMove;
-        }
-
-        m_currentPointToMove2DIntegers = m_pathArray[m_pathArrayIndexToMove];
+        // Assign new.
+        m_pathArrayIndexToMove = 0;
+        m_currentPointToMove2DIntegers = m_pathArray[0];
+        m_pathFinder->addBlockedPosition(m_currentPointToMove2DIntegers);
         m_currentPointToMove3DFloats = glm::vec3(m_currentPointToMove2DIntegers.x, 0.0f, m_currentPointToMove2DIntegers.y);
 
         glm::vec3 rayFrom = m_currentPointToMove3DFloats;
@@ -174,5 +180,14 @@ namespace Survivor3rdPerson
             m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
         else
             m_currentPointToMove3DFloats.y = m_obj->getFromOriginToBottom();
+    }
+
+    void MovableEnemy::removePointToMoveFromBlocked()
+    {
+        if(m_currentPointToMove2DIntegers.x != std::numeric_limits<int>::min())
+        {
+            m_pathFinder->removeBlockedPosition(m_currentPointToMove2DIntegers);
+            m_currentPointToMove2DIntegers = glm::ivec2(std::numeric_limits<int>::min());
+        }
     }
 }
