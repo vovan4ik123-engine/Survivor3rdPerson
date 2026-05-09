@@ -583,13 +583,12 @@ namespace Survivor3rdPerson
 
                 if(distanceToCurrent > EnumsAndVars::enemiesMinDistanceToSpawn && distanceToCurrent < EnumsAndVars::enemiesMaxDistanceToSpawn)
                 {
-                    // We can spawn enemy at this point.
                     m_pointsToSpawnEnemies.push_back(point);
 
                     if(m_player->getController().getIsMoving())
                     {
                         glm::vec2 pointDirXZ = glm::vec2(float(point.x), float(point.y)) - playerPosXZ;
-                        if(BeryllUtils::Common::getAngleInRadians(playerMoveDirXZ, glm::normalize(pointDirXZ)) < 1.0f)
+                        if(BeryllUtils::Common::getAngleInRadians(playerMoveDirXZ, glm::normalize(pointDirXZ)) < 0.55f)
                             m_pointsToSpawnEnemiesOnPlayerMoveDir.push_back(point);
                     }
                 }
@@ -751,7 +750,7 @@ namespace Survivor3rdPerson
             glm::ivec2 spawnPoint2D{0};
             if(m_player->getController().getIsMoving() &&
                m_pointsToSpawnEnemiesOnPlayerMoveDir.size() >= 10 &&
-               Beryll::RandomGenerator::getFloat() > 0.5f)
+               Beryll::RandomGenerator::getFloat() > 0.55f)
             {
                 // Spawn close to player move dir.
                 spawnPoint2D = m_pointsToSpawnEnemiesOnPlayerMoveDir[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemiesOnPlayerMoveDir.size() - 1)];

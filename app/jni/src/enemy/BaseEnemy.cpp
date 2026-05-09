@@ -4,7 +4,7 @@ namespace Survivor3rdPerson
 {
     int BaseEnemy::m_activeEnemiesCount = 0;
     float BaseEnemy::lastSpawnOrRespawnTime = -99999.0f;
-    float BaseEnemy::spawnOrRespawnDelay = 0.7f;
+    float BaseEnemy::spawnOrRespawnDelay = 1.0f;
 
     BaseEnemy::BaseEnemy(const char* filePath,
                          float collisionMassKg,

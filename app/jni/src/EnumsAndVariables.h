@@ -43,6 +43,7 @@ namespace EnumsAndVars
     constexpr inline int enemiesMaxPathfindingInOneFrame = 10;
     constexpr inline float enemiesMinDistanceToSpawn = 150.0f;
     constexpr inline float enemiesMaxDistanceToSpawn = 500.0f;
+
     constexpr inline float enemiesDistanceRespawnAfter = enemiesMaxDistanceToSpawn + 10.0f; // Respawn enemy closer if distance to player > ....
     inline int enemiesCurrentPathfindingIndex = 0;
 
