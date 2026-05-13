@@ -1,11 +1,12 @@
-#include "PlayerBulletAirTrajectory.h"
+#include "WeaponAimTrajectory.h"
+#include "EnumsAndVariables.h"
 
 namespace Survivor3rdPerson
 {
-    PlayerBulletAirTrajectory::PlayerBulletAirTrajectory()
+    WeaponAimTrajectory::WeaponAimTrajectory()
     {
-        m_trajectoryPoint = std::make_shared<Beryll::SimpleObject>("models3D/player/TrajectoryPoint.fbx", Beryll::SceneObjectGroups::NONE);
-        m_trajectoryHitPoint = std::make_shared<Beryll::SimpleObject>("models3D/player/TrajectoryHitPoint.fbx", Beryll::SceneObjectGroups::NONE);
+        m_trajectoryPoint = std::make_shared<Beryll::SimpleObject>("models3D/player/TrajectoryPoint.fbx", EnumsAndVars::SceneGR_NONE);
+        m_trajectoryHitPoint = std::make_shared<Beryll::SimpleObject>("models3D/player/TrajectoryHitPoint.fbx", EnumsAndVars::SceneGR_NONE);
 
         m_shader = Beryll::Renderer::createShader("shaders/GLES/PlayerAirTrajectory.vert",
                                                   "shaders/GLES/PlayerAirTrajectory.frag");
@@ -13,18 +14,18 @@ namespace Survivor3rdPerson
         m_shader->activateDiffuseTextureMat1();
     }
 
-    PlayerBulletAirTrajectory::~PlayerBulletAirTrajectory()
+    WeaponAimTrajectory::~WeaponAimTrajectory()
     {
 
     }
 
-    void PlayerBulletAirTrajectory::calculateAndDraw(const float bulletMass,
-                                                     const glm::vec3& bulletGravity,
-                                                     const glm::vec3& startPosition,
-                                                     const float throwAngleRadians,
-                                                     const glm::vec3& impulseVector, // glm::length(impulseVector) = throw power.
+    void WeaponAimTrajectory::calculateAndDraw(const float bulletMass,
+                                               const glm::vec3& bulletGravity,
+                                               const glm::vec3& startPosition,
+                                               const float throwAngleRadians,
+                                               const glm::vec3& impulseVector, // glm::length(impulseVector) = throw power.
                                                      const glm::vec3& linearFactor,
-                                                     const glm::vec3& sunLightDir)
+                                               const glm::vec3& sunLightDir)
     {
         float inverseMass = 0.0f;
         if(bulletMass > 0.0f)
@@ -58,11 +59,8 @@ namespace Survivor3rdPerson
             XZDistance = glm::length(throwDirXZPlane);
             // https://www.omnicalculator.com/physics/trajectory-projectile-motion
             calculatedY = startHeight +
-                          XZDistance * glm::tan(throwAngleRadians) - glm::length(bulletGravity) * glm::pow(XZDistance, 2) /
+                          XZDistance * glm::tan(throwAngleRadians) + bulletGravity.y * glm::pow(XZDistance, 2) /
                                                                      (2 * glm::pow(speed, 2) * glm::pow(glm::cos(throwAngleRadians), 2));
-
-            if(calculatedY < -10.0f)
-                break;
 
             currentPoint = startPositionXZPlane + throwDirXZPlane;
             currentPoint.y = calculatedY;
@@ -76,8 +74,8 @@ namespace Survivor3rdPerson
             if(castRayBetweenPoints)
             {
                 Beryll::RayClosestHit hit = Beryll::Physics::castRayClosestHit(previousPoint, currentPoint,
-                                                                               Beryll::CollisionGroups::PLAYER_BULLET,
-                                                                               Beryll::CollisionGroups::STATIC_ENVIRONMENT | Beryll::CollisionGroups::MOVABLE_ENEMY);
+                                                                               EnumsAndVars::CollGr_WEAPON_BULLET,
+                                                                               EnumsAndVars::CollGr_STATIC_ENV | EnumsAndVars::CollGr_ENEMY);
 
                 if(hit)
                 {

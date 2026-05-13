@@ -3,10 +3,9 @@
 #include "EngineHeaders.h"
 #include "PlayStateGUILayer.h"
 #include "player/Player.h"
-#include "player/PlayerBullet.h"
-#include "player/PlayerBulletAirTrajectory.h"
 #include "enemy/MovableEnemy.h"
 #include "pathfinding/AStar.h"
+#include "weapon/BallGun.h"
 
 namespace Survivor3rdPerson
 {
@@ -21,25 +20,21 @@ namespace Survivor3rdPerson
         void draw() override;
 
     private:
-        void loadPlayer();
+        void loadPlayerAndWeapon();
         void loadEnv();
         void loadEnemies();
         void loadShadersAndLight();
         void handleControls();
         void handleCamera();
-        void shootBullet();
         void checkMapBorders();
         void updatePathfindingAndSpawnEnemies();
         void spawnEnemies();
-        void handlePlayerAttacks();
         void handleEnemiesAttacks();
 
         std::shared_ptr<PlayStateGUILayer> m_gui;
 
-        int m_enemiesFirstID = 0;
-
         std::shared_ptr<Player> m_player;
-        std::vector<PlayerBullet> m_playerBullets;
+        std::shared_ptr<BaseWeapon> m_playersWeapon;
         std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesToSort; // This array will sorted many times.
         std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesOriginalOrder; // This must keep always same order as loaded.
         std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesToSpawn;
@@ -70,13 +65,6 @@ namespace Survivor3rdPerson
 
         std::unique_ptr<Beryll::SkyBox> m_skyBox;
 
-        // Player bullet + trajectory.
-        PlayerBulletAirTrajectory m_bulletTrajectory;
-        float m_bulletAngleRadians = 0.0f;
-        glm::vec3 m_bulletImpulseVector{0.0f};
-        glm::vec3 m_bulletStartPosition{0.0f};
-        int m_currentBulletIndex = 0;
-
         // Map borders.
         float m_mapMinX = -800.0f;
         float m_mapMaxX = 800.0f;
@@ -86,9 +74,9 @@ namespace Survivor3rdPerson
         // Pathfinding for enemies.
         std::shared_ptr<AStar> m_pathFinder; // Assign new object with map size in constructor of specific map.
         std::vector<glm::ivec2> m_pathAllowedPositionsXZ; // Points for enemy movements.
-        glm::ivec2 m_playerClosestAllowedPos{0}; // On m_allowedPointsToMoveXZ.
-        std::vector<glm::ivec2> m_pointsToSpawnEnemies; // From m_allowedPointsToMoveXZ.
-        std::vector<glm::ivec2> m_pointsToSpawnEnemiesOnPlayerMoveDir; // From m_allowedPointsToMoveXZ.
+        glm::ivec2 m_playerClosestPathPoint{0};
+        std::vector<glm::ivec2> m_pointsToSpawnEnemies;
+        std::vector<glm::ivec2> m_pointsToSpawnEnemiesOnPlayerMoveDir;
 
         // Enemies waves.
         bool m_prepareWave1 = true;

@@ -10,7 +10,6 @@ namespace Survivor3rdPerson
         m_ID = Beryll::LayerID::PLAY_SCENE;
 
         m_staticEnv.reserve(300);
-        m_playerBullets.reserve(100);
         m_movableEnemiesToSort.reserve(1000);
         m_movableEnemiesOriginalOrder.reserve(1000);
         m_movableEnemiesToSpawn.reserve(500);
@@ -20,7 +19,7 @@ namespace Survivor3rdPerson
 
         m_pathFinder = std::make_shared<AStar>(m_mapMinX, m_mapMaxX, m_mapMinZ, m_mapMaxZ, EnumsAndVars::pathFinderStep);
 
-        loadPlayer();
+        loadPlayerAndWeapon();
         loadEnv();
         loadEnemies();
         loadShadersAndLight();
@@ -88,7 +87,7 @@ namespace Survivor3rdPerson
             {
                 so->updateAfterPhysics();
 
-                if(so->getSceneObjectGroup() == Beryll::SceneObjectGroups::ENEMY)
+                if(so->getSceneObjectGroup() == EnumsAndVars::SceneGR_ENEMY)
                 {
                     if(Beryll::Camera::getIsSeeObject(so->getOrigin(), 1.2f))
                         so->enableDraw();
@@ -109,9 +108,9 @@ namespace Survivor3rdPerson
             }
         }
 
-        handlePlayerAttacks();
-        handleEnemiesAttacks();
         handleCamera();
+        m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+        handleEnemiesAttacks();
     }
 
     void PlayStateSceneLayer::draw()
@@ -162,18 +161,6 @@ namespace Survivor3rdPerson
         m_simpleObjSunLightShadows->setMatrix3x3Float("normalMatrix", glm::mat3(modelMatrix));
         Beryll::Renderer::drawObject(m_player, modelMatrix, m_simpleObjSunLightShadows);
 
-        for(auto& bullet : m_playerBullets)
-        {
-            if(bullet.getObj()->getIsEnabledDraw())
-            {
-                modelMatrix = bullet.getObj()->getModelMatrix();
-                m_simpleObjSunLightShadows->setMatrix4x4Float("MVPLightMatrix", m_sunLightVPMatrix * modelMatrix);
-                m_simpleObjSunLightShadows->setMatrix4x4Float("modelMatrix", modelMatrix);
-                m_simpleObjSunLightShadows->setMatrix3x3Float("normalMatrix", glm::mat3(modelMatrix));
-                Beryll::Renderer::drawObject(bullet.getObj(), modelMatrix, m_simpleObjSunLightShadows);
-            }
-        }
-
         m_simpleObjSunLightShadows->set1Float("ambientLight", 0.45f);
 
         for(const auto& staticObj : m_staticEnv)
@@ -184,6 +171,8 @@ namespace Survivor3rdPerson
             m_simpleObjSunLightShadows->setMatrix3x3Float("normalMatrix", glm::mat3(modelMatrix));
             Beryll::Renderer::drawObject(staticObj, modelMatrix, m_simpleObjSunLightShadows);
         }
+
+        m_playersWeapon->draw(m_sunLightVPMatrix, m_sunLightDir, m_simpleObjSunLightShadows);
 
         m_simpleObjSunLightShadowsNormals->bind();
         m_simpleObjSunLightShadowsNormals->set3Float("sunLightDir", m_sunLightDir);
@@ -200,28 +189,20 @@ namespace Survivor3rdPerson
             Beryll::Renderer::drawObject(normalMapObj, modelMatrix, m_simpleObjSunLightShadowsNormals);
         }
 
-        m_bulletTrajectory.calculateAndDraw(EnumsAndVars::bulletMass,
-                                            EnumsAndVars::bulletGravity,
-                                            m_bulletStartPosition,
-                                            m_bulletAngleRadians,
-                                            m_bulletImpulseVector,
-                                            glm::vec3(1.0f),
-                                            m_sunLightDir);
-
         m_skyBox->draw();
         Beryll::TextOnScene::draw();
         //Beryll::ParticleSystem::draw();
     }
 
-    void PlayStateSceneLayer::loadPlayer()
+    void PlayStateSceneLayer::loadPlayerAndWeapon()
     {
         m_player = std::make_shared<Player>("models3D/player/Player.fbx",
                                             EnumsAndVars::playerMass,
                                             true,
                                             Beryll::CollisionFlags::DYNAMIC,
-                                            Beryll::CollisionGroups::PLAYER,
-                                            Beryll::CollisionGroups::STATIC_ENVIRONMENT | Beryll::CollisionGroups::JUMPPAD,
-                                            Beryll::SceneObjectGroups::PLAYER,
+                                            EnumsAndVars::CollGr_PLAYER,
+                                            EnumsAndVars::CollGr_STATIC_ENV | EnumsAndVars::CollGr_JUMPPAD,
+                                            EnumsAndVars::SceneGR_PLAYER,
                                             EnumsAndVars::playerStartHP);
 
         m_player->setOrigin(glm::vec3(-644.0f, m_player->getFromOriginToBottom(), -528.0f));
@@ -233,32 +214,19 @@ namespace Survivor3rdPerson
         m_animatedOrDynamicObjects.push_back(m_player);
         m_simpleObjForShadowMap.push_back(m_player);
 
-        for(int i = 0; i < 20; ++i)
-        {
-            PlayerBullet bullet("models3D/player/PlayerBullet.fbx",
-                                EnumsAndVars::bulletMass,
-                                true,
-                                Beryll::CollisionFlags::DYNAMIC,
-                                Beryll::CollisionGroups::PLAYER_BULLET,
-                                Beryll::CollisionGroups::STATIC_ENVIRONMENT | Beryll::CollisionGroups::MOVABLE_ENEMY,
-                                Beryll::SceneObjectGroups::BULLET);
-
-            m_animatedOrDynamicObjects.push_back(bullet.getObj());
-            m_simpleObjForShadowMap.push_back(bullet.getObj());
-            m_playerBullets.push_back(bullet);
-        }
+        m_playersWeapon = std::make_shared<BallGun>(0.05f);
     }
 
     void PlayStateSceneLayer::loadEnv()
     {
         const auto groundsNormalMap = Beryll::SimpleCollidingObject::loadManyModelsFromOneFile("models3D/map1/GroundNormalMap.fbx",
-                                                                            0.0f,
-                                                                            false,
-                                                                            Beryll::CollisionFlags::STATIC,
-                                                                            Beryll::CollisionGroups::STATIC_ENVIRONMENT,
-                                                                            Beryll::CollisionGroups::PLAYER | Beryll::CollisionGroups::PLAYER_BULLET |
-                                                                            Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                            Beryll::SceneObjectGroups::STATIC_ENVIRONMENT);
+                                                                                               0.0f,
+                                                                                               false,
+                                                                                               Beryll::CollisionFlags::STATIC,
+                                                                                               EnumsAndVars::CollGr_STATIC_ENV,
+                                                                                               EnumsAndVars::CollGr_PLAYER | EnumsAndVars::CollGr_WEAPON_BULLET |
+                                                                                                       EnumsAndVars::CollGr_RAY_FOR_ENV,
+                                                                                               EnumsAndVars::SceneGR_NONE);
 
         for(const auto& obj : groundsNormalMap)
         {
@@ -269,10 +237,10 @@ namespace Survivor3rdPerson
                                                                                         0.0f,
                                                                                         false,
                                                                                         Beryll::CollisionFlags::STATIC,
-                                                                                        Beryll::CollisionGroups::STATIC_ENVIRONMENT,
-                                                                                        Beryll::CollisionGroups::PLAYER | Beryll::CollisionGroups::PLAYER_BULLET |
-                                                                                        Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                                        Beryll::SceneObjectGroups::STATIC_ENVIRONMENT);
+                                                                                        EnumsAndVars::CollGr_STATIC_ENV,
+                                                                                        EnumsAndVars::CollGr_PLAYER | EnumsAndVars::CollGr_WEAPON_BULLET |
+                                                                                                EnumsAndVars::CollGr_RAY_FOR_ENV,
+                                                                                        EnumsAndVars::SceneGR_NONE);
 
         for(const auto& obj : staticEnv)
         {
@@ -284,16 +252,16 @@ namespace Survivor3rdPerson
                                                                                        0.0f,
                                                                                        false,
                                                                                        Beryll::CollisionFlags::STATIC,
-                                                                                       Beryll::CollisionGroups::JUMPPAD,
-                                                                                       Beryll::CollisionGroups::PLAYER,
-                                                                                       Beryll::SceneObjectGroups::JUMPPAD);
+                                                                                       EnumsAndVars::CollGr_JUMPPAD,
+                                                                                       EnumsAndVars::CollGr_PLAYER,
+                                                                                       EnumsAndVars::SceneGR_NONE);
 
         for(const auto& obj : jumpPads)
         {
             m_staticEnv.push_back(obj);
         }
 
-        const auto envNoColliders1 = Beryll::SimpleObject::loadManyModelsFromOneFile("models3D/map1/EnvNoColliders.fbx", Beryll::SceneObjectGroups::STATIC_ENVIRONMENT);
+        const auto envNoColliders1 = Beryll::SimpleObject::loadManyModelsFromOneFile("models3D/map1/EnvNoColliders.fbx", EnumsAndVars::SceneGR_NONE);
 
         for(const auto& obj : envNoColliders1)
         {
@@ -304,19 +272,17 @@ namespace Survivor3rdPerson
 
     void PlayStateSceneLayer::loadEnemies()
     {
-        m_enemiesFirstID = BeryllUtils::Common::getLastGeneratedID() + 1;
-
         for(int i = 0; i < 300; ++i)
         {
             auto skeleton = std::make_shared<MovableEnemy>("models3D/enemies/SkeletonSword.fbx",
-                                                                                    0.0f,
-                                                                                    false,
-                                                                                    Beryll::CollisionFlags::STATIC,
-                                                                                    Beryll::CollisionGroups::MOVABLE_ENEMY,
-                                                                                    Beryll::CollisionGroups::PLAYER_BULLET,
-                                                                                    Beryll::SceneObjectGroups::ENEMY,
-                                                                                    1.0f,
-                                                                                    m_pathFinder);
+                                                           0.0f,
+                                                           false,
+                                                           Beryll::CollisionFlags::STATIC,
+                                                           EnumsAndVars::CollGr_ENEMY,
+                                                           EnumsAndVars::CollGr_WEAPON_BULLET,
+                                                           EnumsAndVars::SceneGR_ENEMY,
+                                                           1.0f,
+                                                           m_pathFinder);
 
             skeleton->getObj()->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
             skeleton->getObj()->setDefaultAnimationByIndex(EnumsAndVars::AnimationIndexes::stand);
@@ -340,14 +306,14 @@ namespace Survivor3rdPerson
         for(int i = 0; i < 200; ++i)
         {
             auto ghoul = std::make_shared<MovableEnemy>("models3D/enemies/GhoulBones.fbx",
-                                                                                 0.0f,
-                                                                                 false,
-                                                                                 Beryll::CollisionFlags::STATIC,
-                                                                                 Beryll::CollisionGroups::MOVABLE_ENEMY,
-                                                                                 Beryll::CollisionGroups::PLAYER_BULLET,
-                                                                                 Beryll::SceneObjectGroups::ENEMY,
-                                                                                 1.0f,
-                                                                                 m_pathFinder);
+                                                        0.0f,
+                                                        false,
+                                                        Beryll::CollisionFlags::STATIC,
+                                                        EnumsAndVars::CollGr_ENEMY,
+                                                        EnumsAndVars::CollGr_WEAPON_BULLET,
+                                                        EnumsAndVars::SceneGR_ENEMY,
+                                                        1.0f,
+                                                        m_pathFinder);
 
             ghoul->getObj()->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
             ghoul->getObj()->setDefaultAnimationByIndex(EnumsAndVars::AnimationIndexes::stand);
@@ -367,6 +333,8 @@ namespace Survivor3rdPerson
             m_movableEnemiesOriginalOrder.push_back(ghoul);
             m_animatedObjForShadowMap.push_back(ghoul->getObj());
         }
+
+        BR_ASSERT((!m_movableEnemiesOriginalOrder.empty()), "%s", "m_movableEnemiesOriginalOrder empty.");
     }
 
     void PlayStateSceneLayer::loadShadersAndLight()
@@ -401,8 +369,8 @@ namespace Survivor3rdPerson
         for(Beryll::Finger& f : fingers)
         {
             if(f.downEvent &&
-               f.pixelsPos.x > 100.0f && f.normalizedPos.x < 0.4f &&
-               f.pixelsPos.y > 100.0f && f.normalizedPos.y < 0.8f)
+               f.pixelsPos.x > 50.0f && f.normalizedPos.x < 0.4f &&
+               f.pixelsPos.y > 50.0f && f.normalizedPos.y < 0.8f)
             {
                 m_gui->playerJoystick->enable();
                 m_gui->playerJoystick->setOrigin(f.normalizedPos);
@@ -443,7 +411,7 @@ namespace Survivor3rdPerson
             if(f.normalizedPos.x < 0.5f)
                 continue;
 
-            shootBullet();
+            m_playersWeapon->shoot();
 
             if(f.downEvent)
             {
@@ -496,33 +464,6 @@ namespace Survivor3rdPerson
         // That allow player see all trajectory including part going down.
         Beryll::Camera::setCameraPos(Beryll::Camera::getCameraPos() + Beryll::Camera::getCameraLeftXYZ() * 8.0f);
         Beryll::Camera::setCameraFrontPos(Beryll::Camera::getCameraFrontPos() + Beryll::Camera::getCameraLeftXYZ() * 7.0f);
-
-        // Update shoot dir after camera.
-        float angleBetweenWorldUpAndCameraBack = BeryllUtils::Common::getAngleInRadians(BeryllConstants::worldUp, Beryll::Camera::getCameraBackDirectionXYZ());
-        m_bulletAngleRadians = angleBetweenWorldUpAndCameraBack - glm::half_pi<float>() + 0.29f; // + 0...f direct trajectory more up.
-
-        m_bulletImpulseVector = m_player->getFaceDirXZ();
-        m_bulletImpulseVector.y = glm::tan(m_bulletAngleRadians);
-        m_bulletImpulseVector = glm::normalize(m_bulletImpulseVector);
-        m_bulletImpulseVector *= EnumsAndVars::bulletMass;
-        m_bulletImpulseVector *= 400.0f;
-
-        m_bulletStartPosition = m_player->getOrigin() + m_player->getFaceDirXZ() * 4.0f;
-        m_bulletStartPosition.y += 4.0f;
-    }
-
-    void PlayStateSceneLayer::shootBullet()
-    {
-        if(EnumsAndVars::shotTimeSec + EnumsAndVars::shotDelaySec < EnumsAndVars::mapPlayTimeSec)
-        {
-            if(m_currentBulletIndex >= m_playerBullets.size())
-                m_currentBulletIndex = 0;
-
-            m_playerBullets[m_currentBulletIndex].shoot(m_bulletStartPosition, m_bulletImpulseVector);
-
-            ++m_currentBulletIndex;
-            EnumsAndVars::shotTimeSec = EnumsAndVars::mapPlayTimeSec;
-        }
     }
 
     void PlayStateSceneLayer::checkMapBorders()
@@ -561,8 +502,11 @@ namespace Survivor3rdPerson
     void PlayStateSceneLayer::updatePathfindingAndSpawnEnemies()
     {
         // Calculate closest point to player.
-        m_playerClosestAllowedPos.x = (int)std::roundf(m_player->getOrigin().x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
-        m_playerClosestAllowedPos.y = (int)std::roundf(m_player->getOrigin().z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
+        glm::vec3 playerPosDir = m_player->getOriginXZ();
+        if(m_player->getController().getIsMoving())
+            playerPosDir += m_player->getController().getMoveDir() * 60.0f;
+        m_playerClosestPathPoint.x = (int)std::roundf(playerPosDir.x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
+        m_playerClosestPathPoint.y = (int)std::roundf(playerPosDir.z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
 
         // Calculate spawn points and spawn enemies if time.
         if(BaseEnemy::lastSpawnOrRespawnTime + BaseEnemy::spawnOrRespawnDelay < EnumsAndVars::mapPlayTimeSec)
@@ -612,7 +556,7 @@ namespace Survivor3rdPerson
             if(m_movableEnemiesOriginalOrder[i]->getIsEnabled() && m_movableEnemiesOriginalOrder[i]->unitState != UnitState::DYING)
             {
                 if(m_movableEnemiesOriginalOrder[i]->pathUpdateTime + 1.0f < EnumsAndVars::mapPlayTimeSec)
-                    m_movableEnemiesOriginalOrder[i]->findPath(m_playerClosestAllowedPos);
+                    m_movableEnemiesOriginalOrder[i]->findPath(m_playerClosestPathPoint);
 
                 ++enemiesUpdated;
             }
@@ -750,7 +694,7 @@ namespace Survivor3rdPerson
             glm::ivec2 spawnPoint2D{0};
             if(m_player->getController().getIsMoving() &&
                m_pointsToSpawnEnemiesOnPlayerMoveDir.size() >= 10 &&
-               Beryll::RandomGenerator::getFloat() > 0.55f)
+               Beryll::RandomGenerator::getFloat() > 0.6f)
             {
                 // Spawn close to player move dir.
                 spawnPoint2D = m_pointsToSpawnEnemiesOnPlayerMoveDir[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemiesOnPlayerMoveDir.size() - 1)];
@@ -762,40 +706,11 @@ namespace Survivor3rdPerson
             }
 
             enemyToSpawn->spawn(spawnPoint2D);
-            enemyToSpawn->findPath(m_playerClosestAllowedPos);
+            enemyToSpawn->findPath(m_playerClosestPathPoint);
         }
 
         //BR_INFO("spawned: %d", spawnedCount);
         //BR_INFO("BaseEnemy::getActiveCount(): %d", BaseEnemy::getActiveCount());
-    }
-
-    void PlayStateSceneLayer::handlePlayerAttacks()
-    {
-        for(auto& bullet : m_playerBullets)
-        {
-            if(bullet.getIsEnabled())
-            {
-                int collisionID = Beryll::Physics::getAnyCollisionForID(bullet.getObjID());
-                if(collisionID >= m_enemiesFirstID && (collisionID - m_enemiesFirstID) < m_movableEnemiesOriginalOrder.size())
-                {
-                    m_movableEnemiesOriginalOrder[collisionID - m_enemiesFirstID]->takeDamage(1.0f);
-
-                    // Damage on screen.
-                    int number = Beryll::RandomGenerator::getInt(1000) + 1;
-                    float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), bullet.getObj()->getOrigin()) * 0.03f);
-                    if(Beryll::RandomGenerator::getFloat() < 0.1f)
-                    {
-                        number *= 10;
-                        numberHeight *= 3.0f;
-                    }
-                    Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, bullet.getObj()->getOrigin() + glm::vec3(0.0f, 10.0f, 0.0f),
-                                                          glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
-                                                                    Beryll::RandomGenerator::getFloat() * 3.0f + 2.0f,
-                                                                    Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
-                                                          50.0f);
-                }
-            }
-        }
     }
 
     void PlayStateSceneLayer::handleEnemiesAttacks()

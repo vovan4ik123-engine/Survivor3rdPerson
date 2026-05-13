@@ -81,8 +81,8 @@ namespace Survivor3rdPerson
         glm::vec3 rayFrom{spawnPoint3D.x, 400.0f, spawnPoint3D.z};
         glm::vec3 rayTo{spawnPoint3D.x, -400.0f, spawnPoint3D.z};
         Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom, rayTo,
-                                                                          Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                          Beryll::CollisionGroups::STATIC_ENVIRONMENT);
+                                                                          EnumsAndVars::CollGr_RAY_FOR_ENV,
+                                                                          EnumsAndVars::CollGr_STATIC_ENV);
         if(rayHit)
             spawnPoint3D.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
         else

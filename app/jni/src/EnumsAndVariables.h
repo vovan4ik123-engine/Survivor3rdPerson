@@ -28,19 +28,26 @@ namespace EnumsAndVars
         static inline float cameraSpeedThresholdToAccelerate = 50.0f;
     };
 
+    // Game specific aliases for physics collision groups.
+    constexpr inline Beryll::CollisionGroups CollGr_PLAYER = Beryll::CollisionGroups::GROUP_1;
+    constexpr inline Beryll::CollisionGroups CollGr_STATIC_ENV = Beryll::CollisionGroups::GROUP_2;
+    constexpr inline Beryll::CollisionGroups CollGr_JUMPPAD = Beryll::CollisionGroups::GROUP_3;
+    constexpr inline Beryll::CollisionGroups CollGr_ENEMY = Beryll::CollisionGroups::GROUP_4;
+    constexpr inline Beryll::CollisionGroups CollGr_WEAPON_BULLET = Beryll::CollisionGroups::GROUP_5;
+    constexpr inline Beryll::CollisionGroups CollGr_RAY_FOR_ENV = Beryll::CollisionGroups::GROUP_6;
+
+    // Game specific aliases for objects on scene.
+    constexpr inline Beryll::SceneObjectGroups SceneGR_NONE = Beryll::SceneObjectGroups::NONE;
+    constexpr inline Beryll::SceneObjectGroups SceneGR_PLAYER = Beryll::SceneObjectGroups::GROUP_1;
+    constexpr inline Beryll::SceneObjectGroups SceneGR_ENEMY = Beryll::SceneObjectGroups::GROUP_2;
+
     // Player.
     constexpr inline float playerMass = 1.0f;
     constexpr inline float playerStartHP = 100.0f;
     constexpr inline glm::vec3 playerGravity{0.0f, -70.0f, 0.0f};
 
-    // Player bullet.
-    constexpr inline float bulletMass = 0.001f;
-    constexpr inline glm::vec3 bulletGravity{0.0f, -10.0f, 0.0f};
-    inline float shotTimeSec = -9999.0f;
-    constexpr inline float shotDelaySec = 0.05f;
-
     // Enemies.
-    constexpr inline int enemiesMaxPathfindingInOneFrame = 10;
+    constexpr inline int enemiesMaxPathfindingInOneFrame = 15;
     constexpr inline float enemiesMinDistanceToSpawn = 150.0f;
     constexpr inline float enemiesMaxDistanceToSpawn = 500.0f;
 
@@ -56,9 +63,6 @@ namespace EnumsAndVars
     inline void reset()
     {
         // Player.
-
-        // Player bullet.
-        shotTimeSec = -9999.0;
 
         // Enemies.
         enemiesCurrentPathfindingIndex = 0;

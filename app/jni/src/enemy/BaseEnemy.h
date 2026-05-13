@@ -65,8 +65,6 @@ namespace Survivor3rdPerson
         int experienceWhenDie = 0;
 
     protected:
-        virtual void move() = 0;
-
         std::shared_ptr<Beryll::AnimatedCollidingCharacter> m_obj;
         int m_objID = 0;
 

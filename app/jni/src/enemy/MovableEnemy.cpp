@@ -79,8 +79,8 @@ namespace Survivor3rdPerson
                 // Check if enemy see player.
                 Beryll::RayClosestHit rayEnv = Beryll::Physics::castRayClosestHit(m_obj->getOrigin(),
                                                                                   playerOrigin,
-                                                                                  Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                                  Beryll::CollisionGroups::STATIC_ENVIRONMENT);
+                                                                                  EnumsAndVars::CollGr_RAY_FOR_ENV,
+                                                                                  EnumsAndVars::CollGr_STATIC_ENV);
 
                 if(rayEnv)
                 {
@@ -140,8 +140,8 @@ namespace Survivor3rdPerson
         rayTo.y -= 200.0f;
         Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom,
                                                                           rayTo,
-                                                                          Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                          Beryll::CollisionGroups::STATIC_ENVIRONMENT);
+                                                                          EnumsAndVars::CollGr_RAY_FOR_ENV,
+                                                                          EnumsAndVars::CollGr_STATIC_ENV);
 
         if(rayHit)
             m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
@@ -152,6 +152,7 @@ namespace Survivor3rdPerson
         // Remove old point to move.
         removePointToMoveFromBlocked();
 
+        // Closest XZ point to enemy on grid (regardless of player). Sometimes can be behind enemy. It just any closest point.
         glm::ivec2 closestXZ{std::roundf(m_obj->getOrigin().x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep,
                              std::roundf(m_obj->getOrigin().z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep};
 
@@ -162,6 +163,9 @@ namespace Survivor3rdPerson
         {
             BR_ASSERT(false, "%s", "m_pathArray.empty()");
         }
+
+        if(m_pathArray.size() > 1)
+            m_pathArray.erase(m_pathArray.begin()); // Because sometimes closestXZ is behind enemy and enemy rotates and start move back.
 
         // Assign new.
         m_pathArrayIndexToMove = 0;
@@ -174,8 +178,8 @@ namespace Survivor3rdPerson
         glm::vec3 rayTo = m_currentPointToMove3DFloats;
         rayTo.y = -400.0f;
         Beryll::RayClosestHit rayHit = Beryll::Physics::castRayClosestHit(rayFrom, rayTo,
-                                                                          Beryll::CollisionGroups::RAY_FOR_ENVIRONMENT,
-                                                                          Beryll::CollisionGroups::STATIC_ENVIRONMENT);
+                                                                          EnumsAndVars::CollGr_RAY_FOR_ENV,
+                                                                          EnumsAndVars::CollGr_STATIC_ENV);
         if(rayHit)
             m_currentPointToMove3DFloats.y = rayHit.hitPoint.y + m_obj->getFromOriginToBottom();
         else

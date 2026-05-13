@@ -4,11 +4,11 @@
 
 namespace Survivor3rdPerson
 {
-    class PlayerBulletAirTrajectory
+    class WeaponAimTrajectory
     {
     public:
-        PlayerBulletAirTrajectory();
-        ~PlayerBulletAirTrajectory();
+        WeaponAimTrajectory();
+        ~WeaponAimTrajectory();
 
         glm::mat4 getModelMatrix() { return m_trajectoryPoint->getModelMatrix(); }
 

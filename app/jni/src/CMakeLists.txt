@@ -12,14 +12,19 @@ add_compile_options(-fexceptions -frtti)
 add_library(main SHARED main.cpp
                         GameStateHelper.cpp
                         Sounds.cpp
+                        # Game states.
                         playState/PlayStateGUILayer.cpp
                         playState/PlayStateSceneLayer.cpp
+                        # Player.
                         player/Player.cpp
-                        player/PlayerBullet.cpp
-                        player/PlayerBulletAirTrajectory.cpp
+                        # Enemies.
                         enemy/BaseEnemy.cpp
                         enemy/MovableEnemy.cpp
                         pathfinding/AStar.cpp
+                        # Weapons.
+                        weapon/BaseWeapon.cpp
+                        weapon/BallGun.cpp
+                        weapon/WeaponAimTrajectory.cpp
             )
 
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

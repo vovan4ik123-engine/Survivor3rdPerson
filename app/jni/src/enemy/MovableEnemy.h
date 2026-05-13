@@ -10,8 +10,8 @@ namespace Survivor3rdPerson
     public:
         MovableEnemy() = delete;
         MovableEnemy(const char* filePath,  // Common params.
-                      float collisionMassKg,    // Physics params.
-                      bool wantCollisionCallBack,
+                     float collisionMassKg,    // Physics params.
+                     bool wantCollisionCallBack,
                      Beryll::CollisionFlags collFlag,
                      Beryll::CollisionGroups collGroup,
                      Beryll::CollisionGroups collMask,
@@ -27,7 +27,7 @@ namespace Survivor3rdPerson
     protected:
 
     private:
-        void move() override;
+        void move();
 
         // Pathfinding.
         std::shared_ptr<AStar> m_pathFinder;
