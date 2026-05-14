@@ -20,7 +20,7 @@ namespace Survivor3rdPerson
                                              sceneGroup,
                                              HP)
     {
-        unitState = UnitState::MOVE;
+        unitState = EnemyState::MOVE;
         m_pathFinder = std::move(pathFinder);
     }
 
@@ -31,7 +31,7 @@ namespace Survivor3rdPerson
 
     void MovableEnemy::update(const glm::vec3& playerOrigin)
     {
-        if(unitState == UnitState::DYING)
+        if(unitState == EnemyState::DYING)
         {
             if(m_obj->getIsOneTimeAnimationFinished())
                 disableEnemy();
@@ -41,37 +41,37 @@ namespace Survivor3rdPerson
         else if(m_currentHP <= 0.0f)
         {
             m_obj->setCurrentAnimationByIndex(3 + Beryll::RandomGenerator::getInt(2), true, false, false);
-            unitState = UnitState::DYING;
+            unitState = EnemyState::DYING;
             m_obj->disableCollisionMesh();
             removePointToMoveFromBlocked();
             return;
         }
 
-        if(unitState == UnitState::ATTACKING)
+        if(unitState == EnemyState::ATTACKING)
         {
             //BR_INFO("%s", "MovableEnemy is attacking");
             if(m_obj->getIsOneTimeAnimationFinished())
             {
                 m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
-                unitState = UnitState::STAND_AIMING;
+                unitState = EnemyState::STAND_AIMING;
             }
-        }
-        else if(getIsDelayBeforeFirstAttack())
-        {
-            //BR_INFO("%s", "MovableEnemy DelayBeforeFirstAttack");
-            unitState = UnitState::STAND_AIMING;
-            m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
-            m_obj->rotateToPoint(playerOrigin, true);
         }
         else if(glm::distance(m_obj->getOrigin(), playerOrigin) > attackDistance)
         {
             //BR_INFO("%s", "MovableEnemy move because distance");
             move();
         }
+        else if(getIsDelayBeforeFirstAttack())
+        {
+            //BR_INFO("%s", "MovableEnemy DelayBeforeFirstAttack");
+            unitState = EnemyState::STAND_AIMING;
+            m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
+            m_obj->rotateToPoint(playerOrigin, true);
+        }
         else
         {
             //BR_INFO("%s", "MovableEnemy IN_ATTACK_RADIUS");
-            unitState = UnitState::IN_ATTACK_RADIUS;
+            unitState = EnemyState::IN_ATTACK_RADIUS;
 
             if(getIsTimeToAttack())
             {
@@ -98,7 +98,7 @@ namespace Survivor3rdPerson
                     else
                     {
                         //BR_INFO("%s", "MovableEnemy CAN_ATTACK");
-                        unitState = UnitState::CAN_ATTACK;
+                        unitState = EnemyState::CAN_ATTACK;
                     }
                 }
             }
@@ -107,7 +107,7 @@ namespace Survivor3rdPerson
 
     void MovableEnemy::move()
     {
-        unitState = UnitState::MOVE;
+        unitState = EnemyState::MOVE;
 
         m_prepareToFirstAttack = true;
 

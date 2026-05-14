@@ -21,8 +21,7 @@ namespace Survivor3rdPerson
         ~MovableEnemy() override;
 
         void update(const glm::vec3& playerOrigin) override;
-        void findPath(glm::ivec2 destinationPoint);
-        float pathUpdateTime = -99999.0f; // Track path update time for specific enemy.
+        void findPath(glm::ivec2 destinationPoint) override;
 
     protected:
 

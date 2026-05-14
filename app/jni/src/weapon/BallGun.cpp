@@ -31,7 +31,7 @@ namespace Survivor3rdPerson
     }
 
     void BallGun::update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
-                         const std::vector<std::shared_ptr<MovableEnemy>>& enemies)
+                         const std::vector<std::shared_ptr<BaseEnemy>>& enemies)
     {
         for(const auto& bullet : m_bullets)
         {
@@ -39,7 +39,7 @@ namespace Survivor3rdPerson
             {
                 bullet->updateAfterPhysics();
 
-                if(glm::length(bullet->getOrigin()) > 2000.0f) // Distance from origin (0.0.0).
+                if(glm::length(bullet->getOrigin()) > 2500.0f) // Distance from origin (0.0.0).
                 {
                     bullet->disableUpdate();
                     bullet->disableCollisionMesh();
@@ -79,7 +79,7 @@ namespace Survivor3rdPerson
                         number *= 10;
                         numberHeight *= 3.0f;
                     }
-                    Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, bullet->getOrigin() + glm::vec3(0.0f, 10.0f, 0.0f),
+                    Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, bullet->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
                                                           glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
                                                                     Beryll::RandomGenerator::getFloat() * 3.0f + 2.0f,
                                                                     Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
@@ -111,7 +111,7 @@ namespace Survivor3rdPerson
                                             m_bulletStartPosition,
                                             m_bulletAngleRadians,
                                             m_bulletImpulseVector,
-                                            glm::vec3(1.0f),
+                                            glm::vec3{1.0f},
                                             sunLightDir);
     }
 

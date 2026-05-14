@@ -3,7 +3,7 @@
 #include "EngineHeaders.h"
 #include "PlayStateGUILayer.h"
 #include "player/Player.h"
-#include "enemy/MovableEnemy.h"
+#include "enemy/BaseEnemy.h"
 #include "pathfinding/AStar.h"
 #include "weapon/BallGun.h"
 
@@ -35,9 +35,9 @@ namespace Survivor3rdPerson
 
         std::shared_ptr<Player> m_player;
         std::shared_ptr<BaseWeapon> m_playersWeapon;
-        std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesToSort; // This array will sorted many times.
-        std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesOriginalOrder; // This must keep always same order as loaded.
-        std::vector<std::shared_ptr<MovableEnemy>> m_movableEnemiesToSpawn;
+        std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesToSort; // This array will sorted many times.
+        std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesOriginalOrder; // This must keep always same order as loaded.
+        std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesToSpawn;
         std::vector<std::shared_ptr<Beryll::SceneObject>> m_animatedOrDynamicObjects;
         std::vector<std::shared_ptr<Beryll::BaseSimpleObject>> m_staticEnv;
         std::vector<std::shared_ptr<Beryll::BaseSimpleObject>> m_objWithNormalMap;

@@ -6,16 +6,16 @@
 
 namespace Survivor3rdPerson
 {
-    enum class UnitState
-    {
-        MOVE, IN_ATTACK_RADIUS, STAND_AIMING, ATTACKING, CAN_ATTACK, DYING
-    };
-
-    enum class UnitType
+    enum class EnemyType
     {
         NONE,
         ENEMY_1,
         ENEMY_2
+    };
+
+    enum class EnemyState
+    {
+        MOVE, IN_ATTACK_RADIUS, STAND_AIMING, ATTACKING, CAN_ATTACK, DYING
     };
 
     class BaseEnemy
@@ -32,14 +32,16 @@ namespace Survivor3rdPerson
                   const float HP);
         virtual ~BaseEnemy();
         
-        virtual void update(const glm::vec3& playerOrigin) = 0; // Can be different for different subclasses.
+        virtual void update(const glm::vec3& playerOrigin) = 0;
+        virtual void findPath(glm::ivec2 destinationPoint) = 0;
+        float pathUpdateTime = -99999.0f; // Track path update time for specific enemy.
 
         std::shared_ptr<Beryll::AnimatedCollidingCharacter> getObj() { return m_obj; }
-        int getObjID() { return m_objID; }
+        const int getObjID() const { return m_objID; }
 
         void enableEnemy();
         void disableEnemy();
-        bool getIsEnabled() { return m_isEnabled; }
+        const bool getIsEnabled() const { return m_isEnabled; }
         static int getActiveCount() { return BaseEnemy::m_activeEnemiesCount; }
         bool getIsTimeToAttack() { return (m_lastAttackTime + timeBetweenAttacks) < EnumsAndVars::mapPlayTimeSec; }
         bool getIsDelayBeforeFirstAttack() { return (m_prepareToFirstAttackStartTime + timeBetweenAttacks) > EnumsAndVars::mapPlayTimeSec; }
@@ -47,22 +49,23 @@ namespace Survivor3rdPerson
         void spawn(glm::ivec2 spawnPoint2D);
         void attack(const glm::vec3& playerOrigin);
 
-        static float lastSpawnOrRespawnTime; // Track spawn time in sec for all enemies.
-        static float spawnOrRespawnDelay; // Time in sec.
-        UnitState unitState = UnitState::MOVE;
-        UnitType unitType = UnitType::NONE;
+        EnemyState unitState = EnemyState::MOVE;
+        EnemyType unitType = EnemyType::NONE;
+
+        // Sounds.
         SoundType attackSound = SoundType::NONE;
         SoundType dieSound = SoundType::NONE;
-        float spawnTime = -99999.0f; // Track spawn time for specific enemy.
 
+        // Spawn.
         bool isCanBeSpawned = false;
+        float spawnTime = -99999.0f; // Track spawn time for specific enemy.
+        static float lastSpawnOrRespawnTime; // Track spawn time in sec for all enemies.
+        static float spawnOrRespawnDelay; // Time in sec.
 
+        // Attack.
         float damage = 0.0f;
-        float attackDistance = 10.0f;
-        float damageRadius = 0.0f; // Use if unit AttackType::RANGE_DAMAGE_RADIUS.
-        float timeBetweenAttacks = 0.0f; // Sec.
-
-        int experienceWhenDie = 0;
+        float attackDistance = 20.0f;
+        float timeBetweenAttacks = 1.0f; // Sec.
 
     protected:
         std::shared_ptr<Beryll::AnimatedCollidingCharacter> m_obj;
@@ -71,9 +74,9 @@ namespace Survivor3rdPerson
         static int m_activeEnemiesCount;
         bool m_isEnabled = true;
 
-        // Attack data.
-        float m_lastAttackTime = -9999.0f; // Sec.
-        float m_prepareToFirstAttackStartTime = -9999.0f;
+        // Attack.
+        float m_lastAttackTime = -99999.0f; // Sec.
+        float m_prepareToFirstAttackStartTime = -99999.0f;
         bool m_prepareToFirstAttack = true; // When was outside attack radius and enter inside attack radius.
 
         // HP.

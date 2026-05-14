@@ -4,7 +4,7 @@ namespace Survivor3rdPerson
 {
     int BaseEnemy::m_activeEnemiesCount = 0;
     float BaseEnemy::lastSpawnOrRespawnTime = -99999.0f;
-    float BaseEnemy::spawnOrRespawnDelay = 1.0f;
+    float BaseEnemy::spawnOrRespawnDelay = 0.9f;
 
     BaseEnemy::BaseEnemy(const char* filePath,
                          float collisionMassKg,
@@ -49,7 +49,7 @@ namespace Survivor3rdPerson
 
         ++BaseEnemy::m_activeEnemiesCount;
         m_isEnabled = true;
-        unitState = UnitState::MOVE;
+        unitState = EnemyState::MOVE;
         m_prepareToFirstAttack = true;
         m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
     }
@@ -67,9 +67,10 @@ namespace Survivor3rdPerson
             --BaseEnemy::m_activeEnemiesCount;
 
         m_isEnabled = false;
-        m_lastAttackTime = -9999.0f;
-        m_prepareToFirstAttackStartTime = -9999.0f;
+        m_lastAttackTime = -99999.0f;
+        m_prepareToFirstAttackStartTime = -99999.0f;
         m_prepareToFirstAttack = true;
+        pathUpdateTime = -99999.0f;
     }
 
     void BaseEnemy::spawn(glm::ivec2 spawnPoint2D)
@@ -98,6 +99,6 @@ namespace Survivor3rdPerson
         m_obj->rotateToPoint(playerOrigin, true);
         m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::attack, true, true);
         m_lastAttackTime = EnumsAndVars::mapPlayTimeSec;
-        unitState = UnitState::ATTACKING;
+        unitState = EnemyState::ATTACKING;
     }
 }

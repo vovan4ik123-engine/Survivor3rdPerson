@@ -89,22 +89,11 @@ namespace Survivor3rdPerson
 
                 if(so->getSceneObjectGroup() == EnumsAndVars::SceneGR_ENEMY)
                 {
-                    if(Beryll::Camera::getIsSeeObject(so->getOrigin(), 1.2f))
+                    if(Beryll::Camera::getIsSeeObject(so->getOrigin(), 1.15f))
                         so->enableDraw();
                     else
                         so->disableDraw();
                 }
-
-                if(so->getOrigin().y < -50.0f)
-                {
-                    so->disableUpdate();
-                    so->disableCollisionMesh();
-                    so->disableDraw();
-                }
-            }
-            else
-            {
-                so->disableDraw();
             }
         }
 
@@ -286,7 +275,7 @@ namespace Survivor3rdPerson
 
             skeleton->getObj()->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
             skeleton->getObj()->setDefaultAnimationByIndex(EnumsAndVars::AnimationIndexes::stand);
-            skeleton->unitType = UnitType::ENEMY_1;
+            skeleton->unitType = EnemyType::ENEMY_1;
             skeleton->attackSound = SoundType::NONE;
             skeleton->dieSound = SoundType::NONE;
 
@@ -294,7 +283,6 @@ namespace Survivor3rdPerson
             skeleton->attackDistance = 30.0f;
             skeleton->timeBetweenAttacks = 1.5f + Beryll::RandomGenerator::getFloat() * 0.5f;
 
-            skeleton->experienceWhenDie = 25;
             skeleton->getObj()->getController().moveSpeed = 40.0f;
 
             m_animatedOrDynamicObjects.push_back(skeleton->getObj());
@@ -317,7 +305,7 @@ namespace Survivor3rdPerson
 
             ghoul->getObj()->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::run, false, true, true);
             ghoul->getObj()->setDefaultAnimationByIndex(EnumsAndVars::AnimationIndexes::stand);
-            ghoul->unitType = UnitType::ENEMY_2;
+            ghoul->unitType = EnemyType::ENEMY_2;
             ghoul->attackSound = SoundType::NONE;
             ghoul->dieSound = SoundType::NONE;
 
@@ -325,7 +313,6 @@ namespace Survivor3rdPerson
             ghoul->attackDistance = 25.0f;
             ghoul->timeBetweenAttacks = 2.5f + Beryll::RandomGenerator::getFloat() * 0.5f;
 
-            ghoul->experienceWhenDie = 25;
             ghoul->getObj()->getController().moveSpeed = 30.0f;
 
             m_animatedOrDynamicObjects.push_back(ghoul->getObj());
@@ -504,7 +491,7 @@ namespace Survivor3rdPerson
         // Calculate closest point to player.
         glm::vec3 playerPosDir = m_player->getOriginXZ();
         if(m_player->getController().getIsMoving())
-            playerPosDir += m_player->getController().getMoveDir() * 60.0f;
+            playerPosDir += m_player->getController().getMoveDir() * 40.0f;
         m_playerClosestPathPoint.x = (int)std::roundf(playerPosDir.x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
         m_playerClosestPathPoint.y = (int)std::roundf(playerPosDir.z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
 
@@ -532,7 +519,7 @@ namespace Survivor3rdPerson
                     if(m_player->getController().getIsMoving())
                     {
                         glm::vec2 pointDirXZ = glm::vec2(float(point.x), float(point.y)) - playerPosXZ;
-                        if(BeryllUtils::Common::getAngleInRadians(playerMoveDirXZ, glm::normalize(pointDirXZ)) < 0.55f)
+                        if(BeryllUtils::Common::getAngleInRadians(playerMoveDirXZ, glm::normalize(pointDirXZ)) < 0.7f)
                             m_pointsToSpawnEnemiesOnPlayerMoveDir.push_back(point);
                     }
                 }
@@ -553,9 +540,9 @@ namespace Survivor3rdPerson
             if(enemiesUpdated >= EnumsAndVars::enemiesMaxPathfindingInOneFrame)
                 break;
 
-            if(m_movableEnemiesOriginalOrder[i]->getIsEnabled() && m_movableEnemiesOriginalOrder[i]->unitState != UnitState::DYING)
+            if(m_movableEnemiesOriginalOrder[i]->getIsEnabled() && m_movableEnemiesOriginalOrder[i]->unitState != EnemyState::DYING)
             {
-                if(m_movableEnemiesOriginalOrder[i]->pathUpdateTime + 1.0f < EnumsAndVars::mapPlayTimeSec)
+                if(m_movableEnemiesOriginalOrder[i]->pathUpdateTime + 0.5f < EnumsAndVars::mapPlayTimeSec)
                     m_movableEnemiesOriginalOrder[i]->findPath(m_playerClosestPathPoint);
 
                 ++enemiesUpdated;
@@ -583,13 +570,13 @@ namespace Survivor3rdPerson
             {
                 enemy->isCanBeSpawned = false;
 
-                if(skeletonCount < 100 && enemy->unitType == UnitType::ENEMY_1)
+                if(skeletonCount < 100 && enemy->unitType == EnemyType::ENEMY_1)
                 {
                     enemy->isCanBeSpawned = true;
                     ++skeletonCount;
                 }
 
-                if(ghoulCount < 70 && enemy->unitType == UnitType::ENEMY_2)
+                if(ghoulCount < 70 && enemy->unitType == EnemyType::ENEMY_2)
                 {
                     enemy->isCanBeSpawned = true;
                     ++ghoulCount;
@@ -608,13 +595,13 @@ namespace Survivor3rdPerson
             {
                 enemy->isCanBeSpawned = false;
 
-                if(skeletonCount < 200 && enemy->unitType == UnitType::ENEMY_1)
+                if(skeletonCount < 200 && enemy->unitType == EnemyType::ENEMY_1)
                 {
                     enemy->isCanBeSpawned = true;
                     ++skeletonCount;
                 }
 
-                if(ghoulCount < 140 && enemy->unitType == UnitType::ENEMY_2)
+                if(ghoulCount < 140 && enemy->unitType == EnemyType::ENEMY_2)
                 {
                     enemy->isCanBeSpawned = true;
                     ++ghoulCount;
@@ -633,13 +620,13 @@ namespace Survivor3rdPerson
             {
                 enemy->isCanBeSpawned = false;
 
-                if(skeletonCount < 300 && enemy->unitType == UnitType::ENEMY_1)
+                if(skeletonCount < 300 && enemy->unitType == EnemyType::ENEMY_1)
                 {
                     enemy->isCanBeSpawned = true;
                     ++skeletonCount;
                 }
 
-                if(ghoulCount < 200 && enemy->unitType == UnitType::ENEMY_2)
+                if(ghoulCount < 200 && enemy->unitType == EnemyType::ENEMY_2)
                 {
                     enemy->isCanBeSpawned = true;
                     ++ghoulCount;
@@ -652,15 +639,15 @@ namespace Survivor3rdPerson
         if(m_pointsToSpawnEnemies.empty())
             return;
 
-        std::sort(m_movableEnemiesToSort.begin(), m_movableEnemiesToSort.end(), [&](const std::shared_ptr<MovableEnemy>& e1, const std::shared_ptr<MovableEnemy>& e2)
+        std::sort(m_movableEnemiesToSort.begin(), m_movableEnemiesToSort.end(), [&](const std::shared_ptr<BaseEnemy>& e1, const std::shared_ptr<BaseEnemy>& e2)
         {
             return (glm::distance(m_player->getOrigin(), e1->getObj()->getOrigin()) > glm::distance(m_player->getOrigin(), e2->getObj()->getOrigin()));
         });
 
-        // Spawn enemies.
+        // Choose enemies to spawn or respawn.
         m_movableEnemiesToSpawn.clear();
-        int mostFarRespawnedCount = 0;
-        const int maxAllowedCountToRespawn = int(BaseEnemy::getActiveCount() / 7) + 1; // Respawn max 1/7 of all active enemies.
+        int respawnedCountMostFar = 0;
+        const int mostFarToRespawnCount = int(BaseEnemy::getActiveCount() / 10) + 1;
         //BR_INFO("BaseEnemy::getActiveCount(): %d maxAllowedCountToRespawn: %d", BaseEnemy::getActiveCount(), maxAllowedCountToRespawn);
         for(const auto& enemy : m_movableEnemiesToSort)
         {
@@ -669,14 +656,14 @@ namespace Survivor3rdPerson
                 m_movableEnemiesToSpawn.push_back(enemy);
 
             // Then respawn enabled enemies if need.
-            if(enemy->getIsEnabled() && enemy->unitState == UnitState::MOVE && enemy->spawnTime + 3.0f < EnumsAndVars::mapPlayTimeSec)
+            if(enemy->getIsEnabled() && enemy->unitState == EnemyState::MOVE && enemy->spawnTime + 3.0f < EnumsAndVars::mapPlayTimeSec)
             {
                 // Always respawn some most far enabled enemies from player.
-                if(mostFarRespawnedCount < maxAllowedCountToRespawn &&
-                   (!Beryll::Camera::getIsSeeObject(enemy->getObj()->getOrigin(), 1.2f) ||
+                if(respawnedCountMostFar < mostFarToRespawnCount &&
+                   (!Beryll::Camera::getIsSeeObject(enemy->getObj()->getOrigin(), 1.15f) ||
                    glm::distance(m_player->getOrigin(), enemy->getObj()->getOrigin()) > 300.0f))
                 {
-                    ++mostFarRespawnedCount;
+                    ++respawnedCountMostFar;
                     m_movableEnemiesToSpawn.push_back(enemy);
                 }
                 else // Continue check distance threshold to respawn.
@@ -687,14 +674,40 @@ namespace Survivor3rdPerson
             }
         }
 
+        int respawnedCountMostNear = 0;
+        const int mostNearToRespawnCount = int(BaseEnemy::getActiveCount() / 18) + 1;
+        for(int i = m_movableEnemiesToSort.size() - 1; i >= 0; --i)
+        {
+            if(respawnedCountMostNear > mostNearToRespawnCount)
+                break;
+
+            if(m_movableEnemiesToSort[i]->getIsEnabled() && m_movableEnemiesToSort[i]->unitState == EnemyState::MOVE)
+            {
+                if(m_player->getController().getIsMoving())
+                {
+                    const glm::vec3 enemyDirXZ = m_movableEnemiesToSort[i]->getObj()->getOriginXZ() - m_player->getOriginXZ();
+                    if(BeryllUtils::Common::getAngleInRadians(m_player->getController().getMoveDirXZ(), glm::normalize(enemyDirXZ)) > 1.0f &&
+                       !Beryll::Camera::getIsSeeObject(m_movableEnemiesToSort[i]->getObj()->getOrigin(), 0.97f))
+                    {
+                        m_movableEnemiesToSpawn.push_back(m_movableEnemiesToSort[i]);
+                        ++respawnedCountMostNear;
+                    }
+                }
+                else if(!Beryll::Camera::getIsSeeObject(m_movableEnemiesToSort[i]->getObj()->getOrigin(), 1.15f))
+                {
+                    m_movableEnemiesToSpawn.push_back(m_movableEnemiesToSort[i]);
+                    ++respawnedCountMostNear;
+                }
+            }
+        }
+
         //int spawnedCount = 0;
         for(auto& enemyToSpawn : m_movableEnemiesToSpawn)
         {
-            //++spawnedCount;
             glm::ivec2 spawnPoint2D{0};
             if(m_player->getController().getIsMoving() &&
                m_pointsToSpawnEnemiesOnPlayerMoveDir.size() >= 10 &&
-               Beryll::RandomGenerator::getFloat() > 0.6f)
+               Beryll::RandomGenerator::getFloat() > 0.65f)
             {
                 // Spawn close to player move dir.
                 spawnPoint2D = m_pointsToSpawnEnemiesOnPlayerMoveDir[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemiesOnPlayerMoveDir.size() - 1)];
@@ -705,6 +718,7 @@ namespace Survivor3rdPerson
                 spawnPoint2D = m_pointsToSpawnEnemies[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemies.size() - 1)];
             }
 
+            //++spawnedCount;
             enemyToSpawn->spawn(spawnPoint2D);
             enemyToSpawn->findPath(m_playerClosestPathPoint);
         }
@@ -717,7 +731,7 @@ namespace Survivor3rdPerson
     {
         for(auto& enemy : m_movableEnemiesOriginalOrder)
         {
-            if(enemy->getIsEnabled() && enemy->unitState == UnitState::CAN_ATTACK)
+            if(enemy->getIsEnabled() && enemy->unitState == EnemyState::CAN_ATTACK)
             {
                 m_player->takeDamage(1.0f);
                 enemy->attack(m_player->getOrigin());
