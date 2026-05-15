@@ -5,12 +5,12 @@
 
 namespace Survivor3rdPerson
 {
-    class BallGun : public BaseWeapon
+    class ShotGun : public BaseWeapon
     {
     public:
-        BallGun() = delete;
-        BallGun(float reloadTime);
-        ~BallGun() override;
+        ShotGun() = delete;
+        ShotGun(float reloadTime, int bulletsPerShot);
+        ~ShotGun() override;
 
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
                     const std::vector<std::shared_ptr<BaseEnemy>>& enemies) override;
@@ -22,6 +22,7 @@ namespace Survivor3rdPerson
 
     private:
         std::vector<std::shared_ptr<Beryll::SimpleCollidingObject>> m_bullets;
+        int m_bulletsPerShot = 10;
         int m_currentBulletIndex = 0;
         const float m_bulletMass = 0.1f;
         glm::vec3 m_bulletStartPosition{0.0f};

@@ -15,6 +15,8 @@ namespace Survivor3rdPerson
         void draw() override;
 
         std::shared_ptr<Beryll::Joystick> playerJoystick;
+        std::shared_ptr<Beryll::CheckBox> checkBoxBallGun;
+        std::shared_ptr<Beryll::CheckBox> checkBoxShotGun;
 
     private:
         std::vector<std::shared_ptr<Beryll::GUIObject>> m_guiObjects;
@@ -24,7 +26,6 @@ namespace Survivor3rdPerson
 #else
         bool m_statisticsShow = true;
 #endif
-
         std::shared_ptr<Beryll::GUIText> m_statistics1;
         std::shared_ptr<Beryll::GUIText> m_statistics2;
         std::shared_ptr<Beryll::GUIText> m_statistics3;

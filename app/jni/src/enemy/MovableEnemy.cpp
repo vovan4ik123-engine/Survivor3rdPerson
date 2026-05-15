@@ -56,17 +56,17 @@ namespace Survivor3rdPerson
                 unitState = EnemyState::STAND_AIMING;
             }
         }
-        else if(glm::distance(m_obj->getOrigin(), playerOrigin) > attackDistance)
-        {
-            //BR_INFO("%s", "MovableEnemy move because distance");
-            move();
-        }
         else if(getIsDelayBeforeFirstAttack())
         {
             //BR_INFO("%s", "MovableEnemy DelayBeforeFirstAttack");
             unitState = EnemyState::STAND_AIMING;
             m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
             m_obj->rotateToPoint(playerOrigin, true);
+        }
+        else if(glm::distance(m_obj->getOrigin(), playerOrigin) > attackDistance)
+        {
+            //BR_INFO("%s", "MovableEnemy move because distance");
+            move();
         }
         else
         {

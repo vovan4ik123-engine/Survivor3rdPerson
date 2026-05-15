@@ -22,9 +22,10 @@ add_library(main SHARED main.cpp
                         enemy/MovableEnemy.cpp
                         pathfinding/AStar.cpp
                         # Weapons.
+                        weapon/WeaponAimTrajectory.cpp
                         weapon/BaseWeapon.cpp
                         weapon/BallGun.cpp
-                        weapon/WeaponAimTrajectory.cpp
+                        weapon/ShotGun.cpp
             )
 
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

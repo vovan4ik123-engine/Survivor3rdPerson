@@ -5,8 +5,8 @@ namespace Survivor3rdPerson
 {
     WeaponAimTrajectory::WeaponAimTrajectory()
     {
-        m_trajectoryPoint = std::make_shared<Beryll::SimpleObject>("models3D/player/TrajectoryPoint.fbx", EnumsAndVars::SceneGR_NONE);
-        m_trajectoryHitPoint = std::make_shared<Beryll::SimpleObject>("models3D/player/TrajectoryHitPoint.fbx", EnumsAndVars::SceneGR_NONE);
+        m_trajectoryPoint = std::make_shared<Beryll::SimpleObject>("models3D/weapon/AimTrajectoryPoint.fbx", EnumsAndVars::SceneGR_NONE);
+        m_trajectoryHitPoint = std::make_shared<Beryll::SimpleObject>("models3D/weapon/AimTrajectoryHitPoint.fbx", EnumsAndVars::SceneGR_NONE);
 
         m_shader = Beryll::Renderer::createShader("shaders/GLES/PlayerAirTrajectory.vert",
                                                   "shaders/GLES/PlayerAirTrajectory.frag");
@@ -47,7 +47,7 @@ namespace Survivor3rdPerson
         bool castRayBetweenPoints = false;
 
         // Calculate some points on fly trajectory.
-        for(int i = 2; i <= 25; ++i)
+        for(int i = 2; i <= 20; ++i)
         {
             throwDirXZPlane = normalizedImpulseVector * float(i * i) * 1.7f; // Point every float(i * i)... meters on trajectory !!! Not on ground !!!
             if(i == 3)

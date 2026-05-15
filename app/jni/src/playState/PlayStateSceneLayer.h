@@ -4,8 +4,8 @@
 #include "PlayStateGUILayer.h"
 #include "player/Player.h"
 #include "enemy/BaseEnemy.h"
+#include "weapon/BaseWeapon.h"
 #include "pathfinding/AStar.h"
-#include "weapon/BallGun.h"
 
 namespace Survivor3rdPerson
 {
@@ -24,7 +24,7 @@ namespace Survivor3rdPerson
         void loadEnv();
         void loadEnemies();
         void loadShadersAndLight();
-        void handleControls();
+        void handleGUI();
         void handleCamera();
         void checkMapBorders();
         void updatePathfindingAndSpawnEnemies();

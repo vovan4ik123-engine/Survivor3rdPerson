@@ -1,14 +1,14 @@
-#include "BallGun.h"
+#include "ShotGun.h"
 
 namespace Survivor3rdPerson
 {
-    BallGun::BallGun(float reloadTime) : BaseWeapon(reloadTime, WeaponType::BALL_GUN)
+    ShotGun::ShotGun(float reloadTime, int bulletsPerShot) : BaseWeapon(reloadTime, WeaponType::SHOT_GUN), m_bulletsPerShot(bulletsPerShot)
     {
-        m_bullets.reserve(20);
+        m_bullets.reserve(60);
 
         for(int i = 0; i < m_bullets.capacity(); ++i)
         {
-            auto obj = std::make_shared<Beryll::SimpleCollidingObject>("models3D/weapon/BallGunBullet.fbx",
+            auto obj = std::make_shared<Beryll::SimpleCollidingObject>("models3D/weapon/ShotGunBullet.fbx",
                                                                        m_bulletMass,
                                                                        true,
                                                                        Beryll::CollisionFlags::DYNAMIC,
@@ -24,7 +24,7 @@ namespace Survivor3rdPerson
         }
     }
 
-    BallGun::~BallGun()
+    ShotGun::~ShotGun()
     {
         for(const auto& bullet : m_bullets)
         {
@@ -34,7 +34,7 @@ namespace Survivor3rdPerson
         }
     }
 
-    void BallGun::update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
+    void ShotGun::update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
                          const std::vector<std::shared_ptr<BaseEnemy>>& enemies)
     {
         for(const auto& bullet : m_bullets)
@@ -59,7 +59,7 @@ namespace Survivor3rdPerson
         m_bulletImpulseVector.y = glm::tan(m_bulletAngleRadians);
         m_bulletImpulseVector = glm::normalize(m_bulletImpulseVector);
         m_bulletImpulseVector *= m_bulletMass;
-        m_bulletImpulseVector *= 400.0f;
+        m_bulletImpulseVector *= 300.0f;
 
         m_bulletStartPosition = playerOrig + playerFaceDirXZ * 4.0f;
         m_bulletStartPosition.y += 4.0f;
@@ -94,7 +94,7 @@ namespace Survivor3rdPerson
     }
 
     // Draw method can change shader because it can draw bullets trajectory and it has own shader.
-    void BallGun::draw(const glm::mat4& sunLightVPMatrix, const glm::vec3& sunLightDir, const std::shared_ptr<Beryll::Shader>& shader)
+    void ShotGun::draw(const glm::mat4& sunLightVPMatrix, const glm::vec3& sunLightDir, const std::shared_ptr<Beryll::Shader>& shader)
     {
         glm::mat4 modelMatrix{1.0f};
 
@@ -119,22 +119,35 @@ namespace Survivor3rdPerson
                                          sunLightDir);
     }
 
-    void BallGun::shoot()
+    void ShotGun::shoot()
     {
         if(m_lastShotTime + m_reloadTime < EnumsAndVars::mapPlayTimeSec)
         {
-            if(!m_bullets[m_currentBulletIndex]->getIsEnabledUpdate())
+            for(int i = 0; i < m_bulletsPerShot; ++i)
             {
-                m_bullets[m_currentBulletIndex]->enableDraw();
-                m_bullets[m_currentBulletIndex]->enableUpdate();
-                m_bullets[m_currentBulletIndex]->enableCollisionMesh();
-            }
-            m_bullets[m_currentBulletIndex]->setOrigin(m_bulletStartPosition, true);
-            m_bullets[m_currentBulletIndex]->applyCentralImpulse(m_bulletImpulseVector);
+                if(!m_bullets[m_currentBulletIndex]->getIsEnabledUpdate())
+                {
+                    m_bullets[m_currentBulletIndex]->enableDraw();
+                    m_bullets[m_currentBulletIndex]->enableUpdate();
+                    m_bullets[m_currentBulletIndex]->enableCollisionMesh();
+                }
 
-            ++m_currentBulletIndex;
-            if(m_currentBulletIndex >= m_bullets.size())
-                m_currentBulletIndex = 0;
+                // Rotate vec around axis by angle (in radians). Left - right.
+                const float angleLeftRight = Beryll::RandomGenerator::getFloat() * 0.4f;
+                glm::vec3 rotateForBullet = glm::rotate(m_bulletImpulseVector, angleLeftRight, Beryll::Camera::getCameraUp());
+                rotateForBullet = glm::rotate(rotateForBullet, 0.2f, -Beryll::Camera::getCameraUp());
+                // Up - down.
+                const float angleUpDown = Beryll::RandomGenerator::getFloat() * 0.1f;
+                rotateForBullet = glm::rotate(rotateForBullet, angleUpDown, Beryll::Camera::getCameraRightXYZ());
+                rotateForBullet = glm::rotate(rotateForBullet, 0.05f, -Beryll::Camera::getCameraRightXYZ());
+
+                m_bullets[m_currentBulletIndex]->setOrigin(m_bulletStartPosition, true);
+                m_bullets[m_currentBulletIndex]->applyCentralImpulse(rotateForBullet);
+
+                ++m_currentBulletIndex;
+                if(m_currentBulletIndex >= m_bullets.size())
+                    m_currentBulletIndex = 0;
+            }
 
             m_lastShotTime = EnumsAndVars::mapPlayTimeSec;
         }

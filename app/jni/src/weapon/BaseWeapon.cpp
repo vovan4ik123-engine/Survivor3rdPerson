@@ -2,7 +2,7 @@
 
 namespace Survivor3rdPerson
 {
-    BaseWeapon::BaseWeapon(float shotDelay) : m_shotDelay(shotDelay)
+    BaseWeapon::BaseWeapon(float reloadTime, WeaponType wType) : m_reloadTime(reloadTime), weaponType(wType)
     {
 
     }

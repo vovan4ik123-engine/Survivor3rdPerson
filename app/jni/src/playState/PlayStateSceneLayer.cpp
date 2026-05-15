@@ -2,6 +2,8 @@
 #include "EnumsAndVariables.h"
 #include "Sounds.h"
 #include "enemy/MovableEnemy.h"
+#include "weapon/BallGun.h"
+#include "weapon/ShotGun.h"
 
 namespace Survivor3rdPerson
 {
@@ -49,7 +51,7 @@ namespace Survivor3rdPerson
         Sounds::reset();
         EnumsAndVars::reset();
         Beryll::TimeStep::fixateTime();
-        Beryll::TextOnScene::setMaxCountToShow(15);
+        Beryll::TextOnScene::setMaxCountToShow(20);
 
         //BR_INFO(" X:%f Y:%f Z:%f", .x, .y, .z);
         //BR_INFO("%s", "");
@@ -68,7 +70,7 @@ namespace Survivor3rdPerson
         Sounds::update();
 
         m_player->update();
-        handleControls();
+        handleGUI();
         checkMapBorders();
         updatePathfindingAndSpawnEnemies();
 
@@ -195,7 +197,7 @@ namespace Survivor3rdPerson
                                             EnumsAndVars::playerStartHP);
 
         m_player->setOrigin(glm::vec3(-644.0f, m_player->getFromOriginToBottom(), -528.0f));
-        m_player->getController().moveSpeed = 50.0f;
+        m_player->getController().moveSpeed = 45.0f;
         m_player->setGravity(EnumsAndVars::playerGravity);
         m_player->setAngularFactor(glm::vec3(0.0f));
         m_player->setLinearFactor(glm::vec3(1.0f, 1.0f, 1.0f));
@@ -204,6 +206,7 @@ namespace Survivor3rdPerson
         m_simpleObjForShadowMap.push_back(m_player);
 
         m_playersWeapon = std::make_shared<BallGun>(0.05f);
+        m_gui->checkBoxBallGun->marked = true;
     }
 
     void PlayStateSceneLayer::loadEnv()
@@ -313,7 +316,7 @@ namespace Survivor3rdPerson
             ghoul->attackDistance = 25.0f;
             ghoul->timeBetweenAttacks = 2.5f + Beryll::RandomGenerator::getFloat() * 0.5f;
 
-            ghoul->getObj()->getController().moveSpeed = 30.0f;
+            ghoul->getObj()->getController().moveSpeed = 35.0f;
 
             m_animatedOrDynamicObjects.push_back(ghoul->getObj());
             m_movableEnemiesToSort.push_back(ghoul);
@@ -350,7 +353,7 @@ namespace Survivor3rdPerson
         m_sunLightDir = -m_dirToSun;
     }
 
-    void PlayStateSceneLayer::handleControls()
+    void PlayStateSceneLayer::handleGUI()
     {
         std::vector<Beryll::Finger>& fingers = Beryll::EventHandler::getFingers();
         for(Beryll::Finger& f : fingers)
@@ -386,7 +389,24 @@ namespace Survivor3rdPerson
         else
         {
             m_gui->playerJoystick->disable();
-            return;
+        }
+
+        // Change weapon.
+        if(m_gui->checkBoxBallGun->getIsMarking() || m_gui->checkBoxBallGun->getIsUnMarking())
+        {
+            m_gui->checkBoxBallGun->marked = true;
+            m_gui->checkBoxShotGun->marked = false;
+
+            if(m_playersWeapon->weaponType != WeaponType::BALL_GUN)
+                m_playersWeapon = std::make_shared<BallGun>(0.05f);
+        }
+        else if(m_gui->checkBoxShotGun->getIsMarking() || m_gui->checkBoxShotGun->getIsUnMarking())
+        {
+            m_gui->checkBoxShotGun->marked = true;
+            m_gui->checkBoxBallGun->marked = false;
+
+            if(m_playersWeapon->weaponType != WeaponType::SHOT_GUN)
+                m_playersWeapon = std::make_shared<ShotGun>(0.2f, 10);
         }
     }
 
@@ -675,18 +695,19 @@ namespace Survivor3rdPerson
         }
 
         int respawnedCountMostNear = 0;
-        const int mostNearToRespawnCount = int(BaseEnemy::getActiveCount() / 18) + 1;
-        for(int i = m_movableEnemiesToSort.size() - 1; i >= 0; --i)
+        const int mostNearToRespawnCount = int(BaseEnemy::getActiveCount() / 14) + 1;
+        for(int i = m_movableEnemiesToSort.size() - 1; i >= 0; i-=5)
         {
             if(respawnedCountMostNear > mostNearToRespawnCount)
                 break;
 
-            if(m_movableEnemiesToSort[i]->getIsEnabled() && m_movableEnemiesToSort[i]->unitState == EnemyState::MOVE)
+            if(m_movableEnemiesToSort[i]->getIsEnabled() &&
+               (m_movableEnemiesToSort[i]->unitState == EnemyState::MOVE || m_movableEnemiesToSort[i]->unitState == EnemyState::STAND_AIMING))
             {
                 if(m_player->getController().getIsMoving())
                 {
                     const glm::vec3 enemyDirXZ = m_movableEnemiesToSort[i]->getObj()->getOriginXZ() - m_player->getOriginXZ();
-                    if(BeryllUtils::Common::getAngleInRadians(m_player->getController().getMoveDirXZ(), glm::normalize(enemyDirXZ)) > 1.0f &&
+                    if(BeryllUtils::Common::getAngleInRadians(m_player->getController().getMoveDirXZ(), glm::normalize(enemyDirXZ)) > 1.57f &&
                        !Beryll::Camera::getIsSeeObject(m_movableEnemiesToSort[i]->getObj()->getOrigin(), 0.97f))
                     {
                         m_movableEnemiesToSpawn.push_back(m_movableEnemiesToSort[i]);
