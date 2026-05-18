@@ -65,13 +65,14 @@ namespace Survivor3rdPerson
         m_bulletStartPosition.y += 4.0f;
 
         // Do damage.
-        int enemiesFirstID = enemies[0]->getObjID();
+        const int enemiesFirstID = enemies[0]->getObjID();
+        const int enemiesLastID = enemies.back()->getObjID();
         for(auto& bullet : m_bullets)
         {
             if(bullet->getIsEnabledUpdate())
             {
                 int collisionID = Beryll::Physics::getAnyCollisionForID(bullet->getID());
-                if(collisionID >= enemiesFirstID && (collisionID - enemiesFirstID) < enemies.size())
+                if(collisionID >= enemiesFirstID && collisionID <= enemiesLastID)
                 {
                     enemies[collisionID - enemiesFirstID]->takeDamage(1.0f);
 

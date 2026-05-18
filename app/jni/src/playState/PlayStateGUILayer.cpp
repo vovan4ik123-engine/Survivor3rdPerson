@@ -30,16 +30,22 @@ namespace Survivor3rdPerson
                                                                   glm::vec3{-50.0f, 50.0f, 0.2f}, glm::vec2{10.0f, 10.0f});
         m_guiObjects.push_back(fixBug);
         checkBoxBallGun = std::make_shared<Beryll::CheckBox>("GUI/CheckBoxUnMarked.png", "GUI/CheckBoxMarked.png",
-                                                             glm::vec3{0.0f, 11.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
+                                                             glm::vec3{0.0f, 0.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
         m_guiObjects.push_back(checkBoxBallGun);
-        std::shared_ptr<Beryll::GUIText> textBallGun = Beryll::Renderer::createGUIText("Ball Gun", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 14.5f, 0.2f}, 4.0f);
+        std::shared_ptr<Beryll::GUIText> textBallGun = Beryll::Renderer::createGUIText("Ball Gun", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 3.5f, 0.2f}, 4.0f);
         m_guiObjects.push_back(textBallGun);
 
         checkBoxShotGun = std::make_shared<Beryll::CheckBox>("GUI/CheckBoxUnMarked.png", "GUI/CheckBoxMarked.png",
-                                                             glm::vec3{0.0f, 0.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
+                                                             glm::vec3{0.0f, 11.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
         m_guiObjects.push_back(checkBoxShotGun);
-        std::shared_ptr<Beryll::GUIText> textShotGun = Beryll::Renderer::createGUIText("Shot Gun", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 3.5f, 0.2f}, 4.0f);
+        std::shared_ptr<Beryll::GUIText> textShotGun = Beryll::Renderer::createGUIText("Shot Gun", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 14.5f, 0.2f}, 4.0f);
         m_guiObjects.push_back(textShotGun);
+
+        checkBoxLaserGun = std::make_shared<Beryll::CheckBox>("GUI/CheckBoxUnMarked.png", "GUI/CheckBoxMarked.png",
+                                                              glm::vec3{0.0f, 22.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
+        m_guiObjects.push_back(checkBoxLaserGun);
+        std::shared_ptr<Beryll::GUIText> textLaserGun = Beryll::Renderer::createGUIText("Laser", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 25.5f, 0.2f}, 4.0f);
+        m_guiObjects.push_back(textLaserGun);
 
         // Sort to update nearest objects first. But draw should starts from farest object(in reverse order).
         std::sort(m_guiObjects.begin(), m_guiObjects.end(), [](std::shared_ptr<Beryll::GUIObject> o1, std::shared_ptr<Beryll::GUIObject> o2)

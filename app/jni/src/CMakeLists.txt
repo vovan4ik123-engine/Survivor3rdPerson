@@ -26,6 +26,7 @@ add_library(main SHARED main.cpp
                         weapon/BaseWeapon.cpp
                         weapon/BallGun.cpp
                         weapon/ShotGun.cpp
+                        weapon/Laser.cpp
             )
 
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

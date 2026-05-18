@@ -8,7 +8,7 @@ namespace Survivor3rdPerson
 {
     enum class WeaponType
     {
-        NONE, BALL_GUN, SHOT_GUN
+        NONE, BALL_GUN, SHOT_GUN, LASER_GUN, SWORD
     };
 
     class BaseWeapon

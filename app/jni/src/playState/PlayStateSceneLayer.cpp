@@ -4,6 +4,7 @@
 #include "enemy/MovableEnemy.h"
 #include "weapon/BallGun.h"
 #include "weapon/ShotGun.h"
+#include "weapon/Laser.h"
 
 namespace Survivor3rdPerson
 {
@@ -181,8 +182,8 @@ namespace Survivor3rdPerson
         }
 
         m_skyBox->draw();
+        Beryll::ParticleSystem::draw();
         Beryll::TextOnScene::draw();
-        //Beryll::ParticleSystem::draw();
     }
 
     void PlayStateSceneLayer::loadPlayerAndWeapon()
@@ -396,17 +397,28 @@ namespace Survivor3rdPerson
         {
             m_gui->checkBoxBallGun->marked = true;
             m_gui->checkBoxShotGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::BALL_GUN)
-                m_playersWeapon = std::make_shared<BallGun>(0.05f);
+                m_playersWeapon = std::make_shared<BallGun>(0.1f);
         }
         else if(m_gui->checkBoxShotGun->getIsMarking() || m_gui->checkBoxShotGun->getIsUnMarking())
         {
             m_gui->checkBoxShotGun->marked = true;
             m_gui->checkBoxBallGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SHOT_GUN)
-                m_playersWeapon = std::make_shared<ShotGun>(0.2f, 10);
+                m_playersWeapon = std::make_shared<ShotGun>(0.3f, 10);
+        }
+        else if(m_gui->checkBoxLaserGun->getIsMarking() || m_gui->checkBoxLaserGun->getIsUnMarking())
+        {
+            m_gui->checkBoxLaserGun->marked = true;
+            m_gui->checkBoxBallGun->marked = false;
+            m_gui->checkBoxShotGun->marked = false;
+
+            if(m_playersWeapon->weaponType != WeaponType::LASER_GUN)
+                m_playersWeapon = std::make_shared<Laser>(0.2f);
         }
     }
 
