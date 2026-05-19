@@ -53,6 +53,12 @@ namespace Survivor3rdPerson
         std::shared_ptr<Beryll::GUIText> textSword = Beryll::Renderer::createGUIText("Sword", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 36.5f, 0.2f}, 4.0f);
         m_guiObjects.push_back(textSword);
 
+        checkBoxBazooka = std::make_shared<Beryll::CheckBox>("GUI/CheckBoxUnMarked.png", "GUI/CheckBoxMarked.png",
+                                                             glm::vec3{0.0f, 44.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
+        m_guiObjects.push_back(checkBoxBazooka);
+        std::shared_ptr<Beryll::GUIText> textBazooka = Beryll::Renderer::createGUIText("Bazooka", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 47.5f, 0.2f}, 4.0f);
+        m_guiObjects.push_back(textBazooka);
+
         // Sort to update nearest objects first. But draw should starts from farest object(in reverse order).
         std::sort(m_guiObjects.begin(), m_guiObjects.end(), [](std::shared_ptr<Beryll::GUIObject> o1, std::shared_ptr<Beryll::GUIObject> o2)
         {

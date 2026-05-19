@@ -26,9 +26,6 @@ namespace Survivor3rdPerson
                 if(glm::distance(playerOrig, enemy->getObj()->getOrigin()) < m_attackDistance && glm::length(enemyDir) > 0.0f &&
                    BeryllUtils::Common::getAngleInRadians(playerFaceDirXZ, glm::normalize(enemyDir)) < m_attackAngleRad)
                 {
-                    enemy->takeDamage(1.0f);
-
-                    // Damage on screen.
                     int number = Beryll::RandomGenerator::getInt(1000) + 1;
                     float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), enemy->getObj()->getOrigin()) * 0.03f);
                     if(Beryll::RandomGenerator::getFloat() < 0.1f)
@@ -36,6 +33,8 @@ namespace Survivor3rdPerson
                         number *= 10;
                         numberHeight *= 3.0f;
                     }
+
+                    enemy->takeDamage(number);
                     Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, enemy->getObj()->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
                                                           glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
                                                                     Beryll::RandomGenerator::getFloat() * 3.0f + 3.0f,

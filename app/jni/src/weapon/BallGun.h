@@ -24,9 +24,9 @@ namespace Survivor3rdPerson
         std::vector<std::shared_ptr<Beryll::SimpleCollidingObject>> m_bullets;
         int m_currentBulletIndex = 0;
         const float m_bulletMass = 0.1f;
-        glm::vec3 m_bulletStartPosition{0.0f};
-        glm::vec3 m_bulletImpulseVector{0.0f};
-        float m_bulletAngleRadians = 0.0f;
+        glm::vec3 m_shotStartPosition{0.0f};
+        glm::vec3 m_shotImpulseVector{0.0f};
+        float m_shotAngleRadians = 0.0f;
         WeaponAimTrajectory m_aimTrajectory;
     };
 }

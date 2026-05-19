@@ -53,30 +53,27 @@ namespace Survivor3rdPerson
         }
 
         float angleBetweenWorldUpAndCameraBack = BeryllUtils::Common::getAngleInRadians(BeryllConstants::worldUp, Beryll::Camera::getCameraBackDirectionXYZ());
-        m_bulletAngleRadians = angleBetweenWorldUpAndCameraBack - glm::half_pi<float>() + 0.3f; // + 0...f direct trajectory more up.
+        m_shotAngleRadians = angleBetweenWorldUpAndCameraBack - glm::half_pi<float>() + 0.3f; // + 0...f direct trajectory more up.
 
-        m_bulletImpulseVector = playerFaceDirXZ;
-        m_bulletImpulseVector.y = glm::tan(m_bulletAngleRadians);
-        m_bulletImpulseVector = glm::normalize(m_bulletImpulseVector);
-        m_bulletImpulseVector *= m_bulletMass;
-        m_bulletImpulseVector *= 400.0f;
+        m_shotImpulseVector = playerFaceDirXZ;
+        m_shotImpulseVector.y = glm::tan(m_shotAngleRadians);
+        m_shotImpulseVector = glm::normalize(m_shotImpulseVector);
+        m_shotImpulseVector *= m_bulletMass;
+        m_shotImpulseVector *= 400.0f;
 
-        m_bulletStartPosition = playerOrig + playerFaceDirXZ * 4.0f;
-        m_bulletStartPosition.y += 4.0f;
+        m_shotStartPosition = playerOrig + playerFaceDirXZ * 4.0f;
+        m_shotStartPosition.y += 4.0f;
 
         // Do damage.
         const int enemiesFirstID = enemies[0]->getObjID();
         const int enemiesLastID = enemies.back()->getObjID();
-        for(auto& bullet : m_bullets)
+        for(const auto& bullet : m_bullets)
         {
             if(bullet->getIsEnabledUpdate())
             {
                 int collisionID = Beryll::Physics::getAnyCollisionForID(bullet->getID());
                 if(collisionID >= enemiesFirstID && collisionID <= enemiesLastID)
                 {
-                    enemies[collisionID - enemiesFirstID]->takeDamage(1.0f);
-
-                    // Damage on screen.
                     int number = Beryll::RandomGenerator::getInt(1000) + 1;
                     float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), bullet->getOrigin()) * 0.03f);
                     if(Beryll::RandomGenerator::getFloat() < 0.1f)
@@ -84,6 +81,8 @@ namespace Survivor3rdPerson
                         number *= 10;
                         numberHeight *= 3.0f;
                     }
+
+                    enemies[collisionID - enemiesFirstID]->takeDamage(number);
                     Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, bullet->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
                                                           glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
                                                                     Beryll::RandomGenerator::getFloat() * 3.0f + 3.0f,
@@ -99,7 +98,7 @@ namespace Survivor3rdPerson
     {
         glm::mat4 modelMatrix{1.0f};
 
-        for(auto& bullet : m_bullets)
+        for(const auto& bullet : m_bullets)
         {
             if(bullet->getIsEnabledDraw())
             {
@@ -113,9 +112,9 @@ namespace Survivor3rdPerson
 
         m_aimTrajectory.calculateAndDraw(m_bulletMass,
                                          glm::vec3{0.0f, -10.0f, 0.0f},
-                                         m_bulletStartPosition,
-                                         m_bulletAngleRadians,
-                                         m_bulletImpulseVector,
+                                         m_shotStartPosition,
+                                         m_shotAngleRadians,
+                                         m_shotImpulseVector,
                                          glm::vec3{1.0f},
                                          sunLightDir);
     }
@@ -130,8 +129,8 @@ namespace Survivor3rdPerson
                 m_bullets[m_currentBulletIndex]->enableUpdate();
                 m_bullets[m_currentBulletIndex]->enableCollisionMesh();
             }
-            m_bullets[m_currentBulletIndex]->setOrigin(m_bulletStartPosition, true);
-            m_bullets[m_currentBulletIndex]->applyCentralImpulse(m_bulletImpulseVector);
+            m_bullets[m_currentBulletIndex]->setOrigin(m_shotStartPosition, true);
+            m_bullets[m_currentBulletIndex]->applyCentralImpulse(m_shotImpulseVector);
 
             ++m_currentBulletIndex;
             if(m_currentBulletIndex >= m_bullets.size())

@@ -6,6 +6,7 @@
 #include "weapon/ShotGun.h"
 #include "weapon/Laser.h"
 #include "weapon/Sword.h"
+#include "weapon/Bazooka.h"
 
 namespace Survivor3rdPerson
 {
@@ -76,7 +77,7 @@ namespace Survivor3rdPerson
         checkMapBorders();
         updatePathfindingAndSpawnEnemies();
 
-        for(auto& enemy : m_movableEnemiesOriginalOrder)
+        for(const auto& enemy : m_movableEnemiesOriginalOrder)
         {
             if(enemy->getIsEnabled())
                 enemy->update(m_player->getOrigin());
@@ -130,7 +131,7 @@ namespace Survivor3rdPerson
         m_animatedObjSunLight->set3Float("sunLightDir", m_sunLightDir);
         m_animatedObjSunLight->set1Float("ambientLight", 0.7f);
 
-        for(auto& animObj : m_movableEnemiesOriginalOrder)
+        for(const auto& animObj : m_movableEnemiesOriginalOrder)
         {
             if(animObj->getObj()->getIsEnabledDraw())
             {
@@ -207,7 +208,7 @@ namespace Survivor3rdPerson
         m_animatedOrDynamicObjects.push_back(m_player);
         m_simpleObjForShadowMap.push_back(m_player);
 
-        m_playersWeapon = std::make_shared<BallGun>(0.05f);
+        m_playersWeapon = std::make_shared<BallGun>(0.25f);
         m_gui->checkBoxBallGun->marked = true;
     }
 
@@ -400,39 +401,69 @@ namespace Survivor3rdPerson
             m_gui->checkBoxShotGun->marked = false;
             m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxSword->marked = false;
+            m_gui->checkBoxBazooka->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::BALL_GUN)
+            {
                 m_playersWeapon = std::make_shared<BallGun>(0.1f);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
         }
         else if(m_gui->checkBoxShotGun->getIsMarking() || m_gui->checkBoxShotGun->getIsUnMarking())
         {
-            m_gui->checkBoxShotGun->marked = true;
             m_gui->checkBoxBallGun->marked = false;
+            m_gui->checkBoxShotGun->marked = true;
             m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxSword->marked = false;
+            m_gui->checkBoxBazooka->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SHOT_GUN)
+            {
                 m_playersWeapon = std::make_shared<ShotGun>(0.3f, 10);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
         }
         else if(m_gui->checkBoxLaserGun->getIsMarking() || m_gui->checkBoxLaserGun->getIsUnMarking())
         {
-            m_gui->checkBoxLaserGun->marked = true;
             m_gui->checkBoxBallGun->marked = false;
             m_gui->checkBoxShotGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = true;
             m_gui->checkBoxSword->marked = false;
+            m_gui->checkBoxBazooka->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::LASER_GUN)
+            {
                 m_playersWeapon = std::make_shared<Laser>(0.2f);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
         }
         else if(m_gui->checkBoxSword->getIsMarking() || m_gui->checkBoxSword->getIsUnMarking())
         {
-            m_gui->checkBoxSword->marked = true;
             m_gui->checkBoxBallGun->marked = false;
-            m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxShotGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = false;
+            m_gui->checkBoxSword->marked = true;
+            m_gui->checkBoxBazooka->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SWORD)
+            {
                 m_playersWeapon = std::make_shared<Sword>(0.4f, 40.0f, 0.44f);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
+        }
+        else if(m_gui->checkBoxBazooka->getIsMarking() || m_gui->checkBoxBazooka->getIsUnMarking())
+        {
+            m_gui->checkBoxBallGun->marked = false;
+            m_gui->checkBoxShotGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = false;
+            m_gui->checkBoxSword->marked = false;
+            m_gui->checkBoxBazooka->marked = true;
+
+            if(m_playersWeapon->weaponType != WeaponType::BAZOOKA)
+            {
+                m_playersWeapon = std::make_shared<Bazooka>(0.25f, 50.0f);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
         }
     }
 
@@ -612,7 +643,7 @@ namespace Survivor3rdPerson
 
             int skeletonCount = 0;
             int ghoulCount = 0;
-            for(auto& enemy : m_movableEnemiesOriginalOrder)
+            for(const auto& enemy : m_movableEnemiesOriginalOrder)
             {
                 enemy->isCanBeSpawned = false;
 
@@ -637,7 +668,7 @@ namespace Survivor3rdPerson
 
             int skeletonCount = 0;
             int ghoulCount = 0;
-            for(auto& enemy : m_movableEnemiesOriginalOrder)
+            for(const auto& enemy : m_movableEnemiesOriginalOrder)
             {
                 enemy->isCanBeSpawned = false;
 
@@ -662,7 +693,7 @@ namespace Survivor3rdPerson
 
             int skeletonCount = 0;
             int ghoulCount = 0;
-            for(auto& enemy : m_movableEnemiesOriginalOrder)
+            for(const auto& enemy : m_movableEnemiesOriginalOrder)
             {
                 enemy->isCanBeSpawned = false;
 
@@ -721,7 +752,7 @@ namespace Survivor3rdPerson
         }
 
         int respawnedCountMostNear = 0;
-        const int mostNearToRespawnCount = int(BaseEnemy::getActiveCount() / 14) + 1;
+        const int mostNearToRespawnCount = int(BaseEnemy::getActiveCount() / 15) + 1;
         for(int i = m_movableEnemiesToSort.size() - 1; i >= 0; i-=5)
         {
             if(respawnedCountMostNear > mostNearToRespawnCount)
@@ -749,12 +780,12 @@ namespace Survivor3rdPerson
         }
 
         //int spawnedCount = 0;
-        for(auto& enemyToSpawn : m_movableEnemiesToSpawn)
+        for(const auto& enemyToSpawn : m_movableEnemiesToSpawn)
         {
             glm::ivec2 spawnPoint2D{0};
             if(m_player->getController().getIsMoving() &&
                m_pointsToSpawnEnemiesOnPlayerMoveDir.size() >= 10 &&
-               Beryll::RandomGenerator::getFloat() > 0.65f)
+               Beryll::RandomGenerator::getFloat() > 0.7f)
             {
                 // Spawn close to player move dir.
                 spawnPoint2D = m_pointsToSpawnEnemiesOnPlayerMoveDir[Beryll::RandomGenerator::getInt(m_pointsToSpawnEnemiesOnPlayerMoveDir.size() - 1)];
@@ -776,7 +807,7 @@ namespace Survivor3rdPerson
 
     void PlayStateSceneLayer::handleEnemiesAttacks()
     {
-        for(auto& enemy : m_movableEnemiesOriginalOrder)
+        for(const auto& enemy : m_movableEnemiesOriginalOrder)
         {
             if(enemy->getIsEnabled() && enemy->unitState == EnemyState::CAN_ATTACK)
             {

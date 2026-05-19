@@ -5,12 +5,12 @@
 
 namespace Survivor3rdPerson
 {
-    class Laser : public BaseWeapon
+    class Bazooka : public BaseWeapon
     {
     public:
-        Laser() = delete;
-        Laser(float reloadTime);
-        ~Laser() override;
+        Bazooka() = delete;
+        Bazooka(float reloadTime, float damageRadius);
+        ~Bazooka() override;
 
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
                     const std::vector<std::shared_ptr<BaseEnemy>>& enemies) override;
@@ -21,11 +21,13 @@ namespace Survivor3rdPerson
     protected:
 
     private:
+        std::vector<std::shared_ptr<Beryll::SimpleCollidingObject>> m_rockets;
+        int m_currentRocketIndex = 0;
+        const float m_rocketMass = 0.1f;
         glm::vec3 m_shotStartPosition{0.0f};
         glm::vec3 m_shotImpulseVector{0.0f};
         float m_shotAngleRadians = 0.0f;
-        float m_shotDistance = 300.0f;
-        std::vector<int> m_hittedEnemiesIDs;
         WeaponAimTrajectory m_aimTrajectory;
+        float m_damageRadius = 50.0f;
     };
 }
