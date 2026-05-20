@@ -7,6 +7,7 @@
 #include "weapon/Laser.h"
 #include "weapon/Sword.h"
 #include "weapon/Bazooka.h"
+#include "weapon/Grenade.h"
 
 namespace Survivor3rdPerson
 {
@@ -208,7 +209,7 @@ namespace Survivor3rdPerson
         m_animatedOrDynamicObjects.push_back(m_player);
         m_simpleObjForShadowMap.push_back(m_player);
 
-        m_playersWeapon = std::make_shared<BallGun>(0.25f);
+        m_playersWeapon = std::make_shared<BallGun>(0.1f);
         m_gui->checkBoxBallGun->marked = true;
     }
 
@@ -402,6 +403,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
+            m_gui->checkBoxGrenadeGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::BALL_GUN)
             {
@@ -416,6 +418,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
+            m_gui->checkBoxGrenadeGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SHOT_GUN)
             {
@@ -430,6 +433,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxLaserGun->marked = true;
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
+            m_gui->checkBoxGrenadeGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::LASER_GUN)
             {
@@ -444,6 +448,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxSword->marked = true;
             m_gui->checkBoxBazooka->marked = false;
+            m_gui->checkBoxGrenadeGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SWORD)
             {
@@ -458,10 +463,26 @@ namespace Survivor3rdPerson
             m_gui->checkBoxLaserGun->marked = false;
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = true;
+            m_gui->checkBoxGrenadeGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::BAZOOKA)
             {
                 m_playersWeapon = std::make_shared<Bazooka>(0.25f, 50.0f);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
+        }
+        else if(m_gui->checkBoxGrenadeGun->getIsMarking() || m_gui->checkBoxGrenadeGun->getIsUnMarking())
+        {
+            m_gui->checkBoxBallGun->marked = false;
+            m_gui->checkBoxShotGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = false;
+            m_gui->checkBoxSword->marked = false;
+            m_gui->checkBoxBazooka->marked = false;
+            m_gui->checkBoxGrenadeGun->marked = true;
+
+            if(m_playersWeapon->weaponType != WeaponType::GRENADE_GUN)
+            {
+                m_playersWeapon = std::make_shared<Grenade>(0.2f, 50.0f);
                 m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
             }
         }

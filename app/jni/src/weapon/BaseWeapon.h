@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EngineHeaders.h"
-#include "EnumsAndVariables.h"
 #include "enemy/BaseEnemy.h"
 
 namespace Survivor3rdPerson
@@ -20,7 +19,7 @@ namespace Survivor3rdPerson
 
         virtual void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
                             const std::vector<std::shared_ptr<BaseEnemy>>& enemies) = 0;
-        // Draw method can change shader because it can draw bullets trajectory and it has own shader.
+        // Draw method can change shader because it can draw aim trajectory and it has own shader.
         virtual void draw(const glm::mat4& sunLightVPMatrix, const glm::vec3& sunLightDir, const std::shared_ptr<Beryll::Shader>& shader) = 0;
         virtual void shoot() = 0;
         const WeaponType weaponType = WeaponType::NONE;

@@ -4,7 +4,7 @@ namespace Survivor3rdPerson
 {
     BallGun::BallGun(float reloadTime) : BaseWeapon(reloadTime, WeaponType::BALL_GUN)
     {
-        m_bullets.reserve(20);
+        m_bullets.reserve(15);
 
         for(int i = 0; i < m_bullets.capacity(); ++i)
         {
@@ -93,7 +93,7 @@ namespace Survivor3rdPerson
         }
     }
 
-    // Draw method can change shader because it can draw bullets trajectory and it has own shader.
+    // Draw method can change shader because it can draw aim trajectory and it has own shader.
     void BallGun::draw(const glm::mat4& sunLightVPMatrix, const glm::vec3& sunLightDir, const std::shared_ptr<Beryll::Shader>& shader)
     {
         glm::mat4 modelMatrix{1.0f};
