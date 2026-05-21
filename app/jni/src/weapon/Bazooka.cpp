@@ -2,8 +2,11 @@
 
 namespace Survivor3rdPerson
 {
-    Bazooka::Bazooka(float reloadTime, float damageRadius) : BaseWeapon(reloadTime, WeaponType::BAZOOKA), m_damageRadius(damageRadius)
+    Bazooka::Bazooka(const float reloadTime, const float damageRadius) : BaseWeapon(reloadTime, WeaponType::BAZOOKA)
     {
+        m_damageRadius = damageRadius;
+        m_damageRadiusSquared = damageRadius * damageRadius;
+
         m_rockets.reserve(10);
 
         for(int i = 0; i < m_rockets.capacity(); ++i)
@@ -87,7 +90,7 @@ namespace Survivor3rdPerson
                     for(const auto& enemy : enemies)
                     {
                         if(enemy->getIsEnabled() && enemy->unitState != EnemyState::DYING &&
-                           glm::distance(enemy->getObj()->getOrigin(), rocket->getOrigin()) < m_damageRadius)
+                           glm::distance2(enemy->getObj()->getOrigin(), rocket->getOrigin()) < m_damageRadiusSquared)
                         {
                             // Rocket damage all enemies in radius but do damage only to enemies in front of player.
                             glm::vec3 enemyDirXZ = enemy->getObj()->getOrigin() - playerOrig;

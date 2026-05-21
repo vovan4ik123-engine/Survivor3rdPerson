@@ -8,7 +8,7 @@ namespace Survivor3rdPerson
     {
     public:
         Sword() = delete;
-        Sword(float reloadTime, float distance, float angleRad);
+        Sword(const float reloadTime, const float distance, const float angleRad);
         ~Sword() override;
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
                     const std::vector<std::shared_ptr<BaseEnemy>>& enemies) override;
@@ -20,6 +20,7 @@ namespace Survivor3rdPerson
 
     private:
         float m_attackDistance = 10.0f;
+        float m_attackDistanceSquared = 10.0f * 10.0f;
         float m_attackAngleRad = glm::radians(20.0f);
         bool m_applyDamage = false;
     };

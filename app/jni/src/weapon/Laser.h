@@ -9,7 +9,7 @@ namespace Survivor3rdPerson
     {
     public:
         Laser() = delete;
-        Laser(float reloadTime);
+        Laser(const float reloadTime);
         ~Laser() override;
 
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,

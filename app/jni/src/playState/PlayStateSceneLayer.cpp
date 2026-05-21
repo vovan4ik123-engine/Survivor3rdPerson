@@ -287,7 +287,7 @@ namespace Survivor3rdPerson
             skeleton->dieSound = SoundType::NONE;
 
             skeleton->damage = 1.0f;
-            skeleton->attackDistance = 30.0f;
+            skeleton->setAttackDistance(30.0f);
             skeleton->timeBetweenAttacks = 1.5f + Beryll::RandomGenerator::getFloat() * 0.5f;
 
             skeleton->getObj()->getController().moveSpeed = 40.0f;
@@ -317,7 +317,7 @@ namespace Survivor3rdPerson
             ghoul->dieSound = SoundType::NONE;
 
             ghoul->damage = 1.0f;
-            ghoul->attackDistance = 25.0f;
+            ghoul->setAttackDistance(25.0f);
             ghoul->timeBetweenAttacks = 2.5f + Beryll::RandomGenerator::getFloat() * 0.5f;
 
             ghoul->getObj()->getController().moveSpeed = 35.0f;
@@ -605,12 +605,12 @@ namespace Survivor3rdPerson
             glm::vec2 playerMoveDirXZ{m_player->getController().getMoveDir().x, m_player->getController().getMoveDir().z};
             playerMoveDirXZ = glm::normalize(playerMoveDirXZ);
             glm::vec2 playerPosXZ{m_player->getOrigin().x, m_player->getOrigin().z};
-            float distanceToCurrent = 0.0f;
+            float distanceToCurrentSquared = 0.0f;
             for(const glm::ivec2& point : m_pathAllowedPositionsXZ)
             {
-                distanceToCurrent = glm::distance(playerPosXZ, glm::vec2(float(point.x), float(point.y)));
+                distanceToCurrentSquared = glm::distance2(playerPosXZ, glm::vec2(float(point.x), float(point.y)));
 
-                if(distanceToCurrent > EnumsAndVars::enemiesMinDistanceToSpawn && distanceToCurrent < EnumsAndVars::enemiesMaxDistanceToSpawn)
+                if(distanceToCurrentSquared > EnumsAndVars::enemiesMinDistanceSquaredToSpawn && distanceToCurrentSquared < EnumsAndVars::enemiesMaxDistanceSquaredToSpawn)
                 {
                     m_pointsToSpawnEnemies.push_back(point);
 
@@ -739,7 +739,7 @@ namespace Survivor3rdPerson
 
         std::sort(m_movableEnemiesToSort.begin(), m_movableEnemiesToSort.end(), [&](const std::shared_ptr<BaseEnemy>& e1, const std::shared_ptr<BaseEnemy>& e2)
         {
-            return (glm::distance(m_player->getOrigin(), e1->getObj()->getOrigin()) > glm::distance(m_player->getOrigin(), e2->getObj()->getOrigin()));
+            return (glm::distance2(m_player->getOrigin(), e1->getObj()->getOrigin()) > glm::distance2(m_player->getOrigin(), e2->getObj()->getOrigin()));
         });
 
         // Choose enemies to spawn or respawn.
@@ -759,14 +759,14 @@ namespace Survivor3rdPerson
                 // Always respawn some most far enabled enemies from player.
                 if(respawnedCountMostFar < mostFarToRespawnCount &&
                    (!Beryll::Camera::getIsSeeObject(enemy->getObj()->getOrigin(), 1.15f) ||
-                   glm::distance(m_player->getOrigin(), enemy->getObj()->getOrigin()) > 300.0f))
+                   glm::distance2(m_player->getOrigin(), enemy->getObj()->getOrigin()) > 300.0f * 300.0f))
                 {
                     ++respawnedCountMostFar;
                     m_movableEnemiesToSpawn.push_back(enemy);
                 }
                 else // Continue check distance threshold to respawn.
                 {
-                    if(glm::distance(m_player->getOrigin(), enemy->getObj()->getOrigin()) > EnumsAndVars::enemiesDistanceRespawnAfter)
+                    if(glm::distance2(m_player->getOrigin(), enemy->getObj()->getOrigin()) > EnumsAndVars::enemiesDistanceSquaredRespawnAfter)
                         m_movableEnemiesToSpawn.push_back(enemy);
                 }
             }

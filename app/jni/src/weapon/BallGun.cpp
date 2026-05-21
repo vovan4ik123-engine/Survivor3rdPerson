@@ -2,7 +2,7 @@
 
 namespace Survivor3rdPerson
 {
-    BallGun::BallGun(float reloadTime) : BaseWeapon(reloadTime, WeaponType::BALL_GUN)
+    BallGun::BallGun(const float reloadTime) : BaseWeapon(reloadTime, WeaponType::BALL_GUN)
     {
         m_bullets.reserve(15);
 

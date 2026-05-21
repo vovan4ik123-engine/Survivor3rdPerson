@@ -2,7 +2,7 @@
 
 namespace Survivor3rdPerson
 {
-    Laser::Laser(float reloadTime) : BaseWeapon(reloadTime, WeaponType::LASER_GUN)
+    Laser::Laser(const float reloadTime) : BaseWeapon(reloadTime, WeaponType::LASER_GUN)
     {
         m_hittedEnemiesIDs.reserve(100);
     }

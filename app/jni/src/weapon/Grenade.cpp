@@ -2,8 +2,11 @@
 
 namespace Survivor3rdPerson
 {
-    Grenade::Grenade(float reloadTime, float damageRadius) : BaseWeapon(reloadTime, WeaponType::GRENADE_GUN), m_damageRadius(damageRadius)
+    Grenade::Grenade(const float reloadTime, const float damageRadius) : BaseWeapon(reloadTime, WeaponType::GRENADE_GUN)
     {
+        m_damageRadius = damageRadius;
+        m_damageRadiusSquared = damageRadius * damageRadius;
+
         m_grenades.reserve(15);
 
         for(int i = 0; i < m_grenades.capacity(); ++i)
@@ -87,7 +90,7 @@ namespace Survivor3rdPerson
                     for(const auto& enemy : enemies)
                     {
                         if(enemy->getIsEnabled() && enemy->unitState != EnemyState::DYING &&
-                           glm::distance(enemy->getObj()->getOrigin(), grenade->getOrigin()) < m_damageRadius)
+                           glm::distance2(enemy->getObj()->getOrigin(), grenade->getOrigin()) < m_damageRadiusSquared)
                         {
                             // Grenade damage all enemies in radius but do damage only to enemies in front of player.
                             glm::vec3 enemyDirXZ = enemy->getObj()->getOrigin() - playerOrig;

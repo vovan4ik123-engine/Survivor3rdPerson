@@ -2,7 +2,7 @@
 
 namespace Survivor3rdPerson
 {
-    ShotGun::ShotGun(float reloadTime, int bulletsPerShot) : BaseWeapon(reloadTime, WeaponType::SHOT_GUN), m_bulletsPerShot(bulletsPerShot)
+    ShotGun::ShotGun(const float reloadTime, const int bulletsPerShot) : BaseWeapon(reloadTime, WeaponType::SHOT_GUN), m_bulletsPerShot(bulletsPerShot)
     {
         m_bullets.reserve(40);
 

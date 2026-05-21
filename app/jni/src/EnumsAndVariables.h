@@ -48,10 +48,10 @@ namespace EnumsAndVars
 
     // Enemies.
     constexpr inline int enemiesMaxPathfindingInOneFrame = 15;
-    constexpr inline float enemiesMinDistanceToSpawn = 150.0f;
-    constexpr inline float enemiesMaxDistanceToSpawn = 500.0f;
+    constexpr inline float enemiesMinDistanceSquaredToSpawn = 150.0f * 150.0f; // To use glm::distance2 and avoid sqrt().
+    constexpr inline float enemiesMaxDistanceSquaredToSpawn = 500.0f * 500.0f;
 
-    constexpr inline float enemiesDistanceRespawnAfter = enemiesMaxDistanceToSpawn + 10.0f; // Respawn enemy closer if distance to player > ....
+    constexpr inline float enemiesDistanceSquaredRespawnAfter = 520.0f * 520.0f; // Respawn enemy closer if distance to player > ....
     inline int enemiesCurrentPathfindingIndex = 0;
 
     // Play.

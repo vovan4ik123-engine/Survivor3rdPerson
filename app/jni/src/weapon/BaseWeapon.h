@@ -14,7 +14,7 @@ namespace Survivor3rdPerson
     {
     public:
         BaseWeapon() = delete;
-        BaseWeapon(float reloadTime, WeaponType wType);
+        BaseWeapon(const float reloadTime, WeaponType wType);
         virtual ~BaseWeapon();
 
         virtual void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,

@@ -2,9 +2,10 @@
 
 namespace Survivor3rdPerson
 {
-    Sword::Sword(float reloadTime, float distance, float angleRad) : BaseWeapon(reloadTime, WeaponType::SWORD)
+    Sword::Sword(const float reloadTime, const float distance, const float angleRad) : BaseWeapon(reloadTime, WeaponType::SWORD)
     {
         m_attackDistance = distance;
+        m_attackDistanceSquared = distance * distance;
         m_attackAngleRad = angleRad;
     }
 
@@ -23,7 +24,7 @@ namespace Survivor3rdPerson
             {
                 glm::vec3 enemyDir = enemy->getObj()->getOrigin() - playerOrig;
                 enemyDir.y = 0.0f;
-                if(glm::distance(playerOrig, enemy->getObj()->getOrigin()) < m_attackDistance && glm::length(enemyDir) > 0.0f &&
+                if(glm::distance2(playerOrig, enemy->getObj()->getOrigin()) < m_attackDistanceSquared && glm::length(enemyDir) > 0.0f &&
                    BeryllUtils::Common::getAngleInRadians(playerFaceDirXZ, glm::normalize(enemyDir)) < m_attackAngleRad)
                 {
                     int number = Beryll::RandomGenerator::getInt(1000) + 1;

@@ -9,7 +9,7 @@ namespace Survivor3rdPerson
     {
     public:
         Bazooka() = delete;
-        Bazooka(float reloadTime, float damageRadius);
+        Bazooka(const float reloadTime, const float damageRadius);
         ~Bazooka() override;
 
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
@@ -29,5 +29,6 @@ namespace Survivor3rdPerson
         float m_shotAngleRadians = 0.0f;
         WeaponAimTrajectory m_aimTrajectory;
         float m_damageRadius = 50.0f;
+        float m_damageRadiusSquared = 50.0f;
     };
 }

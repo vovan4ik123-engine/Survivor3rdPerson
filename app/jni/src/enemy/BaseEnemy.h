@@ -48,6 +48,11 @@ namespace Survivor3rdPerson
         void takeDamage(const float damag) { m_currentHP -= damag; }
         void spawn(glm::ivec2 spawnPoint2D);
         void attack(const glm::vec3& playerOrigin);
+        void setAttackDistance(const float dist)
+        {
+            m_attackDistance = dist;
+            m_attackDistanceSquared = dist * dist;
+        }
 
         EnemyState unitState = EnemyState::MOVE;
         EnemyType unitType = EnemyType::NONE;
@@ -64,7 +69,6 @@ namespace Survivor3rdPerson
 
         // Attack.
         float damage = 0.0f;
-        float attackDistance = 20.0f;
         float timeBetweenAttacks = 1.0f; // Sec.
 
     protected:
@@ -78,6 +82,8 @@ namespace Survivor3rdPerson
         float m_lastAttackTime = -99999.0f; // Sec.
         float m_prepareToFirstAttackStartTime = -99999.0f;
         bool m_prepareToFirstAttack = true; // When was outside attack radius and enter inside attack radius.
+        float m_attackDistance = 20.0f;
+        float m_attackDistanceSquared = 20.0f * 20.0f; // To avoid sqrt() and use glm::distance2.
 
         // HP.
         float m_maxHP = 0.0f;

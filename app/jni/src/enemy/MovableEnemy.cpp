@@ -40,8 +40,8 @@ namespace Survivor3rdPerson
         }
         else if(m_currentHP <= 0.0f)
         {
-            m_obj->setCurrentAnimationByIndex(3 + Beryll::RandomGenerator::getInt(2), true, false, false);
             unitState = EnemyState::DYING;
+            m_obj->setCurrentAnimationByIndex(3 + Beryll::RandomGenerator::getInt(2), true, false, false);
             m_obj->disableCollisionMesh();
             removePointToMoveFromBlocked();
             return;
@@ -49,33 +49,33 @@ namespace Survivor3rdPerson
 
         if(unitState == EnemyState::ATTACKING)
         {
-            //BR_INFO("%s", "MovableEnemy is attacking");
+            //BR_INFO("%s", "MovableEnemy is attacking.");
             if(m_obj->getIsOneTimeAnimationFinished())
             {
-                m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
                 unitState = EnemyState::STAND_AIMING;
+                m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
             }
         }
         else if(getIsDelayBeforeFirstAttack())
         {
-            //BR_INFO("%s", "MovableEnemy DelayBeforeFirstAttack");
+            //BR_INFO("%s", "MovableEnemy DelayBeforeFirstAttack.");
             unitState = EnemyState::STAND_AIMING;
             m_obj->setCurrentAnimationByIndex(EnumsAndVars::AnimationIndexes::stand, false, false);
             m_obj->rotateToPoint(playerOrigin, true);
         }
-        else if(glm::distance(m_obj->getOrigin(), playerOrigin) > attackDistance)
+        else if(glm::distance2(m_obj->getOrigin(), playerOrigin) > m_attackDistanceSquared)
         {
-            //BR_INFO("%s", "MovableEnemy move because distance");
+            //BR_INFO("%s", "MovableEnemy move because distance.");
             move();
         }
         else
         {
-            //BR_INFO("%s", "MovableEnemy IN_ATTACK_RADIUS");
+            //BR_INFO("%s", "MovableEnemy IN_ATTACK_RADIUS.");
             unitState = EnemyState::IN_ATTACK_RADIUS;
 
             if(getIsTimeToAttack())
             {
-                //BR_INFO("%s", "MovableEnemy if(getIsTimeToAttack())");
+                //BR_INFO("%s", "MovableEnemy if(getIsTimeToAttack()).");
                 // Check if enemy see player.
                 Beryll::RayClosestHit rayEnv = Beryll::Physics::castRayClosestHit(m_obj->getOrigin(),
                                                                                   playerOrigin,
@@ -84,20 +84,20 @@ namespace Survivor3rdPerson
 
                 if(rayEnv)
                 {
-                    //BR_INFO("%s", "MovableEnemy move because dont see");
+                    //BR_INFO("%s", "MovableEnemy move because dont see.");
                     move();
                 }
                 else
                 {
                     if(m_prepareToFirstAttack)
                     {
-                        //BR_INFO("%s", "MovableEnemy prepareToFirstAttack");
+                        //BR_INFO("%s", "MovableEnemy prepareToFirstAttack.");
                         m_prepareToFirstAttack = false;
                         m_prepareToFirstAttackStartTime = EnumsAndVars::mapPlayTimeSec;
                     }
                     else
                     {
-                        //BR_INFO("%s", "MovableEnemy CAN_ATTACK");
+                        //BR_INFO("%s", "MovableEnemy CAN_ATTACK.");
                         unitState = EnemyState::CAN_ATTACK;
                     }
                 }

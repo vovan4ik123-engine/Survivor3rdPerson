@@ -9,7 +9,7 @@ namespace Survivor3rdPerson
     {
     public:
         ShotGun() = delete;
-        ShotGun(float reloadTime, int bulletsPerShot);
+        ShotGun(const float reloadTime, const int bulletsPerShot);
         ~ShotGun() override;
 
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,

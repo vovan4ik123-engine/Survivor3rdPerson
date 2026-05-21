@@ -9,7 +9,7 @@ namespace Survivor3rdPerson
     {
     public:
         Grenade() = delete;
-        Grenade(float reloadTime, float damageRadius);
+        Grenade(const float reloadTime, const float damageRadius);
         ~Grenade() override;
 
         void update(const glm::vec3& playerOrig, const glm::vec3& playerFaceDirXZ,
@@ -29,6 +29,7 @@ namespace Survivor3rdPerson
         float m_shotAngleRadians = 0.0f;
         WeaponAimTrajectory m_aimTrajectory;
         float m_damageRadius = 50.0f;
+        float m_damageRadiusSquared = 50.0f;
         const glm::vec3 m_grenadeGravity{0.0f, -200.0f, 0.0f};
     };
 }
