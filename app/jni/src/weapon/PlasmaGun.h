@@ -56,7 +56,7 @@ namespace Survivor3rdPerson
         std::vector<Plasma> m_plasmas;
         int m_currentPlasmaIndex = 0;
         int m_maxEnemiesHit = 10;
-        const float m_plasmaSpeed = 180.0f;
+        const float m_plasmaSpeed = 200.0f;
         glm::vec3 m_shotStartPosition{0.0f};
         glm::vec3 m_shotImpulseVector{0.0f};
         float m_shotAngleRadians = 0.0f;

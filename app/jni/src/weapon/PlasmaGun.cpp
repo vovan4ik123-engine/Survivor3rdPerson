@@ -5,10 +5,10 @@ namespace Survivor3rdPerson
     PlasmaGun::PlasmaGun(const float reloadTime, const int maxEnemiesHit) : BaseWeapon(reloadTime, WeaponType::PLASMA_GUN)
     {
         m_maxEnemiesHit = maxEnemiesHit;
-        if(m_maxEnemiesHit > 15)
-            m_maxEnemiesHit = 15;
+        if(m_maxEnemiesHit > 20)
+            m_maxEnemiesHit = 20;
 
-        m_plasmas.reserve(25);
+        m_plasmas.reserve(30);
 
         for(int i = 0; i < m_plasmas.capacity(); ++i)
         {

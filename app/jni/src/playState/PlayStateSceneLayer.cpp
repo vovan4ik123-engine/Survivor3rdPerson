@@ -502,7 +502,7 @@ namespace Survivor3rdPerson
 
             if(m_playersWeapon->weaponType != WeaponType::PLASMA_GUN)
             {
-                m_playersWeapon = std::make_shared<PlasmaGun>(0.1f, 15);
+                m_playersWeapon = std::make_shared<PlasmaGun>(0.1f, 20);
                 m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
             }
         }
