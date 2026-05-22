@@ -32,20 +32,16 @@ namespace Survivor3rdPerson
         {
             if(enemyID >= enemiesFirstID && enemyID <= enemiesLastID)
             {
-                int number = Beryll::RandomGenerator::getInt(1000) + 1;
-                float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), enemies[enemyID - enemiesFirstID]->getObj()->getOrigin()) * 0.03f);
+                int damage = Beryll::RandomGenerator::getInt(1000) + 1;
+                bool critical = false;
                 if(Beryll::RandomGenerator::getFloat() < 0.1f)
                 {
-                    number *= 10;
-                    numberHeight *= 3.0f;
+                    damage *= 10;
+                    critical = true;
                 }
 
-                enemies[enemyID - enemiesFirstID]->takeDamage(number);
-                Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, enemies[enemyID - enemiesFirstID]->getObj()->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
-                                                      glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
-                                                                Beryll::RandomGenerator::getFloat() * 3.0f + 3.0f,
-                                                                Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
-                                                      60.0f);
+                enemies[enemyID - enemiesFirstID]->takeDamage(damage);
+                showDamage(damage, enemies[enemyID - enemiesFirstID]->getObj()->getOrigin(), critical);
             }
         }
 
@@ -57,7 +53,7 @@ namespace Survivor3rdPerson
         // Laser drawn by particle system.
 
         m_aimTrajectory.calculateAndDraw(1.0f,
-                                         glm::vec3{0.0f, 0.0f, 0.0f},
+                                         0.0f,
                                          m_shotStartPosition,
                                          m_shotAngleRadians,
                                          m_shotImpulseVector,

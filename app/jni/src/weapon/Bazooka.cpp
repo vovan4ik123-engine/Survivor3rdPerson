@@ -46,7 +46,7 @@ namespace Survivor3rdPerson
             {
                 rocket->updateAfterPhysics();
 
-                if(glm::length(rocket->getOrigin()) > 2500.0f) // Distance from origin (0.0.0).
+                if(glm::length(rocket->getOrigin()) > 5000.0f) // Distance from origin (0.0.0).
                 {
                     rocket->disableUpdate();
                     rocket->disableCollisionMesh();
@@ -97,20 +97,16 @@ namespace Survivor3rdPerson
                             enemyDirXZ.y = 0.0f;
                             if(BeryllUtils::Common::getAngleInRadians(playerFaceDirXZ, glm::normalize(enemyDirXZ)) < 1.4f)
                             {
-                                int number = Beryll::RandomGenerator::getInt(1000) + 1;
-                                float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), enemy->getObj()->getOrigin()) * 0.03f);
+                                int damage = Beryll::RandomGenerator::getInt(1000) + 1;
+                                bool critical = false;
                                 if(Beryll::RandomGenerator::getFloat() < 0.1f)
                                 {
-                                    number *= 10;
-                                    numberHeight *= 3.0f;
+                                    damage *= 10;
+                                    critical = true;
                                 }
 
-                                enemy->takeDamage(number);
-                                Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, enemy->getObj()->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
-                                                                      glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
-                                                                                Beryll::RandomGenerator::getFloat() * 3.0f + 3.0f,
-                                                                                Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
-                                                                      60.0f);
+                                enemy->takeDamage(damage);
+                                showDamage(damage, enemy->getObj()->getOrigin(), critical);
                             }
                         }
                     }
@@ -137,7 +133,7 @@ namespace Survivor3rdPerson
         }
 
         m_aimTrajectory.calculateAndDraw(m_rocketMass,
-                                         glm::vec3{0.0f, -10.0f, 0.0f},
+                                         -10.0f,
                                          m_shotStartPosition,
                                          m_shotAngleRadians,
                                          m_shotImpulseVector,
@@ -156,9 +152,6 @@ namespace Survivor3rdPerson
                 m_rockets[m_currentRocketIndex]->enableCollisionMesh();
             }
 
-            //const glm::vec3 shotDirNorm = glm::normalize(m_shotImpulseVector);
-            //const glm::vec3 rightVec = glm::normalize(glm::cross(shotDirNorm, BeryllConstants::worldUp));
-            //const glm::vec3 upVec = glm::normalize(glm::cross(rightVec, shotDirNorm));
             m_rockets[m_currentRocketIndex]->addToRotation(glm::rotation(m_rockets[m_currentRocketIndex]->getFaceDirXYZ(), glm::normalize(m_shotImpulseVector)));
 
             m_rockets[m_currentRocketIndex]->setOrigin(m_shotStartPosition, true);

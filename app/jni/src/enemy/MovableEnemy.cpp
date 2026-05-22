@@ -153,8 +153,8 @@ namespace Survivor3rdPerson
         removePointToMoveFromBlocked();
 
         // Closest XZ point to enemy on grid (regardless of player). Sometimes can be behind enemy. It just any closest point.
-        glm::ivec2 closestXZ{std::roundf(m_obj->getOrigin().x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep,
-                             std::roundf(m_obj->getOrigin().z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep};
+        glm::ivec2 closestXZ{std::roundf(m_obj->getOrigin().x / EnumsAndVars::enemiesPathFinderStep) * EnumsAndVars::enemiesPathFinderStep,
+                             std::roundf(m_obj->getOrigin().z / EnumsAndVars::enemiesPathFinderStep) * EnumsAndVars::enemiesPathFinderStep};
 
         m_pathArray = m_pathFinder->findPath(closestXZ, destinationPoint, 6);
         pathUpdateTime = EnumsAndVars::mapPlayTimeSec;

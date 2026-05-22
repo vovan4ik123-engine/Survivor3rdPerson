@@ -13,7 +13,7 @@ namespace Survivor3rdPerson
         glm::mat4 getModelMatrix() { return m_trajectoryPoint->getModelMatrix(); }
 
         void calculateAndDraw(const float bulletMass,
-                              const glm::vec3& bulletGravity,
+                              const float bulletGravityY, // Gravity should be applied only along Y axis.
                               const glm::vec3& startPosition,
                               const float throwAngleRadians,
                               const glm::vec3& impulseVector,

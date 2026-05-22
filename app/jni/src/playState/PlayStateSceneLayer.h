@@ -35,7 +35,7 @@ namespace Survivor3rdPerson
 
         std::shared_ptr<Player> m_player;
         std::shared_ptr<BaseWeapon> m_playersWeapon;
-        std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesToSort; // This array will sorted many times.
+        std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesSorted; // This array will sorted many times.
         std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesOriginalOrder; // This must keep always same order as loaded.
         std::vector<std::shared_ptr<BaseEnemy>> m_movableEnemiesToSpawn;
         std::vector<std::shared_ptr<Beryll::SceneObject>> m_animatedOrDynamicObjects;

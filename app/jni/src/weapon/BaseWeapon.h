@@ -7,7 +7,7 @@ namespace Survivor3rdPerson
 {
     enum class WeaponType
     {
-        NONE, BALL_GUN, SHOT_GUN, LASER_GUN, SWORD, BAZOOKA, GRENADE_GUN
+        NONE, BALL_GUN, SHOT_GUN, LASER_GUN, SWORD, BAZOOKA, GRENADE_GUN, PLASMA_GUN
     };
 
     class BaseWeapon
@@ -22,6 +22,7 @@ namespace Survivor3rdPerson
         // Draw method can change shader because it can draw aim trajectory and it has own shader.
         virtual void draw(const glm::mat4& sunLightVPMatrix, const glm::vec3& sunLightDir, const std::shared_ptr<Beryll::Shader>& shader) = 0;
         virtual void shoot() = 0;
+        virtual void showDamage(const int damage, const glm::vec3& pos, const bool crit);
         const WeaponType weaponType = WeaponType::NONE;
 
     protected:

@@ -65,8 +65,14 @@ namespace Survivor3rdPerson
         std::shared_ptr<Beryll::GUIText> textGrenade = Beryll::Renderer::createGUIText("Grenade", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 58.5f, 0.2f}, 4.0f);
         m_guiObjects.push_back(textGrenade);
 
+        checkBoxPlasmaGun = std::make_shared<Beryll::CheckBox>("GUI/CheckBoxUnMarked.png", "GUI/CheckBoxMarked.png",
+                                                               glm::vec3{0.0f, 66.0f, 0.2f}, glm::vec2{10.0f / screenAR, 10.0f});
+        m_guiObjects.push_back(checkBoxPlasmaGun);
+        std::shared_ptr<Beryll::GUIText> textPlasma = Beryll::Renderer::createGUIText("Plasma", glm::vec3{0.35f, 0.8f, 0.0f}, glm::vec3{4.5f, 69.5f, 0.2f}, 4.0f);
+        m_guiObjects.push_back(textPlasma);
+
         // Sort to update nearest objects first. But draw should starts from farest object(in reverse order).
-        std::sort(m_guiObjects.begin(), m_guiObjects.end(), [](std::shared_ptr<Beryll::GUIObject> o1, std::shared_ptr<Beryll::GUIObject> o2)
+        std::sort(m_guiObjects.begin(), m_guiObjects.end(), [](std::shared_ptr<Beryll::GUIObject>& o1, std::shared_ptr<Beryll::GUIObject>& o2)
         {
             return (o1->getPositionNormalized().z > o2->getPositionNormalized().z);
         });

@@ -41,24 +41,17 @@ namespace EnumsAndVars
     constexpr inline Beryll::SceneObjectGroups SceneGR_PLAYER = Beryll::SceneObjectGroups::GROUP_1;
     constexpr inline Beryll::SceneObjectGroups SceneGR_ENEMY = Beryll::SceneObjectGroups::GROUP_2;
 
-    // Player.
-    constexpr inline float playerMass = 1.0f;
-    constexpr inline float playerStartHP = 100.0f;
-    constexpr inline glm::vec3 playerGravity{0.0f, -70.0f, 0.0f};
-
     // Enemies.
     constexpr inline int enemiesMaxPathfindingInOneFrame = 15;
     constexpr inline float enemiesMinDistanceSquaredToSpawn = 150.0f * 150.0f; // To use glm::distance2 and avoid sqrt().
     constexpr inline float enemiesMaxDistanceSquaredToSpawn = 500.0f * 500.0f;
 
     constexpr inline float enemiesDistanceSquaredRespawnAfter = 520.0f * 520.0f; // Respawn enemy closer if distance to player > ....
+    constexpr inline int enemiesPathFinderStep = 10;
     inline int enemiesCurrentPathfindingIndex = 0;
 
     // Play.
     inline float mapPlayTimeSec = 0.0f;
-
-    // Path finding.
-    constexpr inline int pathFinderStep = 10;
 
     inline void reset()
     {

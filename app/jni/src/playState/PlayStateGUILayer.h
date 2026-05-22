@@ -21,6 +21,7 @@ namespace Survivor3rdPerson
         std::shared_ptr<Beryll::CheckBox> checkBoxSword;
         std::shared_ptr<Beryll::CheckBox> checkBoxBazooka;
         std::shared_ptr<Beryll::CheckBox> checkBoxGrenadeGun;
+        std::shared_ptr<Beryll::CheckBox> checkBoxPlasmaGun;
 
     private:
         std::vector<std::shared_ptr<Beryll::GUIObject>> m_guiObjects;

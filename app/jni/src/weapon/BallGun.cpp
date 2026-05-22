@@ -43,7 +43,7 @@ namespace Survivor3rdPerson
             {
                 bullet->updateAfterPhysics();
 
-                if(glm::length(bullet->getOrigin()) > 2500.0f) // Distance from origin (0.0.0).
+                if(glm::length(bullet->getOrigin()) > 5000.0f) // Distance from origin (0.0.0).
                 {
                     bullet->disableUpdate();
                     bullet->disableCollisionMesh();
@@ -74,20 +74,16 @@ namespace Survivor3rdPerson
                 int collisionID = Beryll::Physics::getAnyCollisionForID(bullet->getID());
                 if(collisionID >= enemiesFirstID && collisionID <= enemiesLastID)
                 {
-                    int number = Beryll::RandomGenerator::getInt(1000) + 1;
-                    float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), bullet->getOrigin()) * 0.03f);
+                    int damage = Beryll::RandomGenerator::getInt(1000) + 1;
+                    bool critical = false;
                     if(Beryll::RandomGenerator::getFloat() < 0.1f)
                     {
-                        number *= 10;
-                        numberHeight *= 3.0f;
+                        damage *= 10;
+                        critical = true;
                     }
 
-                    enemies[collisionID - enemiesFirstID]->takeDamage(number);
-                    Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, bullet->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
-                                                          glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
-                                                                    Beryll::RandomGenerator::getFloat() * 3.0f + 3.0f,
-                                                                    Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
-                                                          60.0f);
+                    enemies[collisionID - enemiesFirstID]->takeDamage(damage);
+                    showDamage(damage, bullet->getOrigin(), critical);
                 }
             }
         }
@@ -111,7 +107,7 @@ namespace Survivor3rdPerson
         }
 
         m_aimTrajectory.calculateAndDraw(m_bulletMass,
-                                         glm::vec3{0.0f, -10.0f, 0.0f},
+                                         -10.0f,
                                          m_shotStartPosition,
                                          m_shotAngleRadians,
                                          m_shotImpulseVector,

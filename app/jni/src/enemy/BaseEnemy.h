@@ -45,7 +45,7 @@ namespace Survivor3rdPerson
         static int getActiveCount() { return BaseEnemy::m_activeEnemiesCount; }
         bool getIsTimeToAttack() { return (m_lastAttackTime + timeBetweenAttacks) < EnumsAndVars::mapPlayTimeSec; }
         bool getIsDelayBeforeFirstAttack() { return (m_prepareToFirstAttackStartTime + timeBetweenAttacks) > EnumsAndVars::mapPlayTimeSec; }
-        void takeDamage(const float damag) { m_currentHP -= damag; }
+        void takeDamage(const float damage) { m_currentHP -= damage; }
         void spawn(glm::ivec2 spawnPoint2D);
         void attack(const glm::vec3& playerOrigin);
         void setAttackDistance(const float dist)

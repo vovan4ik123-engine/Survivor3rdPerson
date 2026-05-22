@@ -27,20 +27,16 @@ namespace Survivor3rdPerson
                 if(glm::distance2(playerOrig, enemy->getObj()->getOrigin()) < m_attackDistanceSquared && glm::length(enemyDir) > 0.0f &&
                    BeryllUtils::Common::getAngleInRadians(playerFaceDirXZ, glm::normalize(enemyDir)) < m_attackAngleRad)
                 {
-                    int number = Beryll::RandomGenerator::getInt(1000) + 1;
-                    float numberHeight = std::max(2.5f, glm::distance(Beryll::Camera::getCameraPos(), enemy->getObj()->getOrigin()) * 0.03f);
+                    int damage = Beryll::RandomGenerator::getInt(1000) + 1;
+                    bool critical = false;
                     if(Beryll::RandomGenerator::getFloat() < 0.1f)
                     {
-                        number *= 10;
-                        numberHeight *= 3.0f;
+                        damage *= 10;
+                        critical = true;
                     }
 
-                    enemy->takeDamage(number);
-                    Beryll::TextOnScene::addNumbersToShow(number, numberHeight, 0.5f, enemy->getObj()->getOrigin() + glm::vec3{0.0f, 10.0f, 0.0f},
-                                                          glm::vec3{Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f,
-                                                                    Beryll::RandomGenerator::getFloat() * 3.0f + 3.0f,
-                                                                    Beryll::RandomGenerator::getFloat() * 10.0f - 5.0f},
-                                                          60.0f);
+                    enemy->takeDamage(damage);
+                    showDamage(damage, enemy->getObj()->getOrigin(), critical);
                 }
             }
         }

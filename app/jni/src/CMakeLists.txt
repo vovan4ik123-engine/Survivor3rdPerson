@@ -30,6 +30,7 @@ add_library(main SHARED main.cpp
                         weapon/Sword.cpp
                         weapon/Bazooka.cpp
                         weapon/Grenade.cpp
+                        weapon/PlasmaGun.cpp
             )
 
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

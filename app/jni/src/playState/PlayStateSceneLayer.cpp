@@ -8,6 +8,7 @@
 #include "weapon/Sword.h"
 #include "weapon/Bazooka.h"
 #include "weapon/Grenade.h"
+#include "weapon/PlasmaGun.h"
 
 namespace Survivor3rdPerson
 {
@@ -16,14 +17,14 @@ namespace Survivor3rdPerson
         m_ID = Beryll::LayerID::PLAY_SCENE;
 
         m_staticEnv.reserve(300);
-        m_movableEnemiesToSort.reserve(1000);
+        m_movableEnemiesSorted.reserve(1000);
         m_movableEnemiesOriginalOrder.reserve(1000);
         m_movableEnemiesToSpawn.reserve(500);
         m_animatedOrDynamicObjects.reserve(1500);
         m_animatedObjForShadowMap.reserve(1100);
         m_simpleObjForShadowMap.reserve(300);
 
-        m_pathFinder = std::make_shared<AStar>(m_mapMinX, m_mapMaxX, m_mapMinZ, m_mapMaxZ, EnumsAndVars::pathFinderStep);
+        m_pathFinder = std::make_shared<AStar>(m_mapMinX, m_mapMaxX, m_mapMinZ, m_mapMaxZ, EnumsAndVars::enemiesPathFinderStep);
 
         loadPlayerAndWeapon();
         loadEnv();
@@ -167,6 +168,7 @@ namespace Survivor3rdPerson
             Beryll::Renderer::drawObject(staticObj, modelMatrix, m_simpleObjSunLightShadows);
         }
 
+        m_simpleObjSunLightShadows->set1Float("ambientLight", 0.65f);
         m_playersWeapon->draw(m_sunLightVPMatrix, m_sunLightDir, m_simpleObjSunLightShadows);
 
         m_simpleObjSunLightShadowsNormals->bind();
@@ -192,19 +194,15 @@ namespace Survivor3rdPerson
     void PlayStateSceneLayer::loadPlayerAndWeapon()
     {
         m_player = std::make_shared<Player>("models3D/player/Player.fbx",
-                                            EnumsAndVars::playerMass,
                                             true,
                                             Beryll::CollisionFlags::DYNAMIC,
                                             EnumsAndVars::CollGr_PLAYER,
                                             EnumsAndVars::CollGr_STATIC_ENV | EnumsAndVars::CollGr_JUMPPAD,
-                                            EnumsAndVars::SceneGR_PLAYER,
-                                            EnumsAndVars::playerStartHP);
+                                            EnumsAndVars::SceneGR_PLAYER);
 
         m_player->setOrigin(glm::vec3(-644.0f, m_player->getFromOriginToBottom(), -528.0f));
         m_player->getController().moveSpeed = 45.0f;
-        m_player->setGravity(EnumsAndVars::playerGravity);
-        m_player->setAngularFactor(glm::vec3(0.0f));
-        m_player->setLinearFactor(glm::vec3(1.0f, 1.0f, 1.0f));
+        m_player->setAngularFactor(glm::vec3{0.0f});
 
         m_animatedOrDynamicObjects.push_back(m_player);
         m_simpleObjForShadowMap.push_back(m_player);
@@ -293,7 +291,7 @@ namespace Survivor3rdPerson
             skeleton->getObj()->getController().moveSpeed = 40.0f;
 
             m_animatedOrDynamicObjects.push_back(skeleton->getObj());
-            m_movableEnemiesToSort.push_back(skeleton);
+            m_movableEnemiesSorted.push_back(skeleton);
             m_movableEnemiesOriginalOrder.push_back(skeleton);
             m_animatedObjForShadowMap.push_back(skeleton->getObj());
         }
@@ -323,7 +321,7 @@ namespace Survivor3rdPerson
             ghoul->getObj()->getController().moveSpeed = 35.0f;
 
             m_animatedOrDynamicObjects.push_back(ghoul->getObj());
-            m_movableEnemiesToSort.push_back(ghoul);
+            m_movableEnemiesSorted.push_back(ghoul);
             m_movableEnemiesOriginalOrder.push_back(ghoul);
             m_animatedObjForShadowMap.push_back(ghoul->getObj());
         }
@@ -404,6 +402,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
             m_gui->checkBoxGrenadeGun->marked = false;
+            m_gui->checkBoxPlasmaGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::BALL_GUN)
             {
@@ -419,6 +418,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
             m_gui->checkBoxGrenadeGun->marked = false;
+            m_gui->checkBoxPlasmaGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SHOT_GUN)
             {
@@ -434,6 +434,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
             m_gui->checkBoxGrenadeGun->marked = false;
+            m_gui->checkBoxPlasmaGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::LASER_GUN)
             {
@@ -449,6 +450,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxSword->marked = true;
             m_gui->checkBoxBazooka->marked = false;
             m_gui->checkBoxGrenadeGun->marked = false;
+            m_gui->checkBoxPlasmaGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::SWORD)
             {
@@ -464,6 +466,7 @@ namespace Survivor3rdPerson
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = true;
             m_gui->checkBoxGrenadeGun->marked = false;
+            m_gui->checkBoxPlasmaGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::BAZOOKA)
             {
@@ -479,10 +482,27 @@ namespace Survivor3rdPerson
             m_gui->checkBoxSword->marked = false;
             m_gui->checkBoxBazooka->marked = false;
             m_gui->checkBoxGrenadeGun->marked = true;
+            m_gui->checkBoxPlasmaGun->marked = false;
 
             if(m_playersWeapon->weaponType != WeaponType::GRENADE_GUN)
             {
                 m_playersWeapon = std::make_shared<Grenade>(0.2f, 50.0f);
+                m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
+            }
+        }
+        else if(m_gui->checkBoxPlasmaGun->getIsMarking() || m_gui->checkBoxPlasmaGun->getIsUnMarking())
+        {
+            m_gui->checkBoxBallGun->marked = false;
+            m_gui->checkBoxShotGun->marked = false;
+            m_gui->checkBoxLaserGun->marked = false;
+            m_gui->checkBoxSword->marked = false;
+            m_gui->checkBoxBazooka->marked = false;
+            m_gui->checkBoxGrenadeGun->marked = false;
+            m_gui->checkBoxPlasmaGun->marked = true;
+
+            if(m_playersWeapon->weaponType != WeaponType::PLASMA_GUN)
+            {
+                m_playersWeapon = std::make_shared<PlasmaGun>(0.1f, 15);
                 m_playersWeapon->update(m_player->getOrigin(), m_player->getFaceDirXZ(), m_movableEnemiesOriginalOrder);
             }
         }
@@ -496,6 +516,7 @@ namespace Survivor3rdPerson
             if(f.normalizedPos.x < 0.5f)
                 continue;
 
+            //if(f.normalizedPos.y > 0.25f)
             m_playersWeapon->shoot();
 
             if(f.downEvent)
@@ -590,8 +611,8 @@ namespace Survivor3rdPerson
         glm::vec3 playerPosDir = m_player->getOriginXZ();
         if(m_player->getController().getIsMoving())
             playerPosDir += m_player->getController().getMoveDir() * 40.0f;
-        m_playerClosestPathPoint.x = (int)std::roundf(playerPosDir.x / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
-        m_playerClosestPathPoint.y = (int)std::roundf(playerPosDir.z / EnumsAndVars::pathFinderStep) * EnumsAndVars::pathFinderStep;
+        m_playerClosestPathPoint.x = (int)std::roundf(playerPosDir.x / EnumsAndVars::enemiesPathFinderStep) * EnumsAndVars::enemiesPathFinderStep;
+        m_playerClosestPathPoint.y = (int)std::roundf(playerPosDir.z / EnumsAndVars::enemiesPathFinderStep) * EnumsAndVars::enemiesPathFinderStep;
 
         // Calculate spawn points and spawn enemies if time.
         if(BaseEnemy::lastSpawnOrRespawnTime + BaseEnemy::spawnOrRespawnDelay < EnumsAndVars::mapPlayTimeSec)
@@ -737,7 +758,7 @@ namespace Survivor3rdPerson
         if(m_pointsToSpawnEnemies.empty())
             return;
 
-        std::sort(m_movableEnemiesToSort.begin(), m_movableEnemiesToSort.end(), [&](const std::shared_ptr<BaseEnemy>& e1, const std::shared_ptr<BaseEnemy>& e2)
+        std::sort(m_movableEnemiesSorted.begin(), m_movableEnemiesSorted.end(), [&](const std::shared_ptr<BaseEnemy>& e1, const std::shared_ptr<BaseEnemy>& e2)
         {
             return (glm::distance2(m_player->getOrigin(), e1->getObj()->getOrigin()) > glm::distance2(m_player->getOrigin(), e2->getObj()->getOrigin()));
         });
@@ -747,14 +768,14 @@ namespace Survivor3rdPerson
         int respawnedCountMostFar = 0;
         const int mostFarToRespawnCount = int(BaseEnemy::getActiveCount() / 10) + 1;
         //BR_INFO("BaseEnemy::getActiveCount(): %d maxAllowedCountToRespawn: %d", BaseEnemy::getActiveCount(), maxAllowedCountToRespawn);
-        for(const auto& enemy : m_movableEnemiesToSort)
+        for(const auto& enemy : m_movableEnemiesSorted)
         {
             // Always spawn disabled enemies that can be spawned. Usually after was killed.
             if(!enemy->getIsEnabled() && enemy->isCanBeSpawned)
                 m_movableEnemiesToSpawn.push_back(enemy);
 
             // Then respawn enabled enemies if need.
-            if(enemy->getIsEnabled() && enemy->unitState == EnemyState::MOVE && enemy->spawnTime + 3.0f < EnumsAndVars::mapPlayTimeSec)
+            if(enemy->getIsEnabled() && enemy->unitState == EnemyState::MOVE && enemy->spawnTime + 4.0f < EnumsAndVars::mapPlayTimeSec)
             {
                 // Always respawn some most far enabled enemies from player.
                 if(respawnedCountMostFar < mostFarToRespawnCount &&
@@ -774,27 +795,27 @@ namespace Survivor3rdPerson
 
         int respawnedCountMostNear = 0;
         const int mostNearToRespawnCount = int(BaseEnemy::getActiveCount() / 15) + 1;
-        for(int i = m_movableEnemiesToSort.size() - 1; i >= 0; i-=5)
+        for(int i = m_movableEnemiesSorted.size() - 1; i >= 0; i-=5)
         {
             if(respawnedCountMostNear > mostNearToRespawnCount)
                 break;
 
-            if(m_movableEnemiesToSort[i]->getIsEnabled() &&
-               (m_movableEnemiesToSort[i]->unitState == EnemyState::MOVE || m_movableEnemiesToSort[i]->unitState == EnemyState::STAND_AIMING))
+            if(m_movableEnemiesSorted[i]->getIsEnabled() &&
+               (m_movableEnemiesSorted[i]->unitState == EnemyState::MOVE || m_movableEnemiesSorted[i]->unitState == EnemyState::STAND_AIMING))
             {
                 if(m_player->getController().getIsMoving())
                 {
-                    const glm::vec3 enemyDirXZ = m_movableEnemiesToSort[i]->getObj()->getOriginXZ() - m_player->getOriginXZ();
+                    const glm::vec3 enemyDirXZ = m_movableEnemiesSorted[i]->getObj()->getOriginXZ() - m_player->getOriginXZ();
                     if(BeryllUtils::Common::getAngleInRadians(m_player->getController().getMoveDirXZ(), glm::normalize(enemyDirXZ)) > 1.57f &&
-                       !Beryll::Camera::getIsSeeObject(m_movableEnemiesToSort[i]->getObj()->getOrigin(), 0.97f))
+                       !Beryll::Camera::getIsSeeObject(m_movableEnemiesSorted[i]->getObj()->getOrigin(), 1.1f))
                     {
-                        m_movableEnemiesToSpawn.push_back(m_movableEnemiesToSort[i]);
+                        m_movableEnemiesToSpawn.push_back(m_movableEnemiesSorted[i]);
                         ++respawnedCountMostNear;
                     }
                 }
-                else if(!Beryll::Camera::getIsSeeObject(m_movableEnemiesToSort[i]->getObj()->getOrigin(), 1.15f))
+                else if(!Beryll::Camera::getIsSeeObject(m_movableEnemiesSorted[i]->getObj()->getOrigin(), 1.15f))
                 {
-                    m_movableEnemiesToSpawn.push_back(m_movableEnemiesToSort[i]);
+                    m_movableEnemiesToSpawn.push_back(m_movableEnemiesSorted[i]);
                     ++respawnedCountMostNear;
                 }
             }

@@ -20,11 +20,11 @@ namespace Survivor3rdPerson
     }
 
     void WeaponAimTrajectory::calculateAndDraw(const float bulletMass,
-                                               const glm::vec3& bulletGravity,
+                                               const float bulletGravityY, // Gravity should be applied only along Y axis.
                                                const glm::vec3& startPosition,
                                                const float throwAngleRadians,
                                                const glm::vec3& impulseVector, // glm::length(impulseVector) = throw power.
-                                                     const glm::vec3& linearFactor,
+                                               const glm::vec3& linearFactor,
                                                const glm::vec3& sunLightDir)
     {
         float inverseMass = 0.0f;
@@ -59,7 +59,7 @@ namespace Survivor3rdPerson
             XZDistance = glm::length(throwDirXZPlane);
             // https://www.omnicalculator.com/physics/trajectory-projectile-motion
             calculatedY = startHeight +
-                          XZDistance * glm::tan(throwAngleRadians) + bulletGravity.y * glm::pow(XZDistance, 2) /
+                          XZDistance * glm::tan(throwAngleRadians) + bulletGravityY * glm::pow(XZDistance, 2) /
                                                                      (2 * glm::pow(speed, 2) * glm::pow(glm::cos(throwAngleRadians), 2));
 
             currentPoint = startPositionXZPlane + throwDirXZPlane;

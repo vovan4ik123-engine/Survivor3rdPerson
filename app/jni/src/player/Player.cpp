@@ -5,23 +5,22 @@
 namespace Survivor3rdPerson
 {
     Player::Player(const char* filePath,  // Common params.
-                   float collisionMassKg,    // Physics params.
-                   bool wantCollisionCallBack,
+                   bool wantCollisionCallBack, // Physics params.
                    Beryll::CollisionFlags collFlag,
                    Beryll::CollisionGroups collGroup,
                    Beryll::CollisionGroups collMask,
-                   Beryll::SceneObjectGroups sceneGroup,
-                   const float HP)
+                   Beryll::SceneObjectGroups sceneGroup)
                    : Beryll::SimpleCollidingCharacter(filePath,
-                                                      collisionMassKg,
+                                                      1.0f,
                                                       wantCollisionCallBack,
                                                       collFlag,
                                                       collGroup,
                                                       collMask,
                                                       sceneGroup)
     {
-        m_maxHP = HP;
-        m_currentHP = HP;
+        m_maxHP = 100.0f;
+        m_currentHP = m_maxHP;
+        Beryll::SimpleCollidingCharacter::setGravity(glm::vec3{0.0f, -70.0f, 0.0f});
     }
 
     Player::~Player()
